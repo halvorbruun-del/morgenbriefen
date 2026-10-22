@@ -1157,6 +1157,22 @@
       // Fjern kun ytterste container-bakgrunner fra e-post malen slik at bokser og kort beholder sin form
       cleanHtml = cleanHtml.replace(/(<table[^>]*style="[^"]*?)background(?:-color)?:\s*#[a-fA-F0-9]+;?/gi, '$1');
       cleanHtml = cleanHtml.replace(/(<td[^>]*style="[^"]*?)background(?:-color)?:\s*#[a-fA-F0-9]+;?/gi, '$1');
+
+      // Sikre at alle Wikimedia Commons-bilder rutes til upload.wikimedia.org og har anonym referrerpolicy
+      cleanHtml = cleanHtml.replace(/https:\/\/thumb\.wikimedia\.org\//gi, 'https://upload.wikimedia.org/');
+      cleanHtml = cleanHtml.replace(/<img\b([^>]*?)>/gi, (match, attrs) => {
+        let updated = attrs;
+        if (!/referrerpolicy=/i.test(updated)) {
+          updated += ' referrerpolicy="no-referrer"';
+        }
+        if (!/loading=/i.test(updated)) {
+          updated += ' loading="lazy"';
+        }
+        if (!/onerror=/i.test(updated)) {
+          updated += ' onerror="this.onerror=null; this.style.display=\'none\';"';
+        }
+        return '<img' + updated + '>';
+      });
       container.innerHTML = cleanHtml;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
