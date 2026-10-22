@@ -877,7 +877,7 @@
       if (errBox) errBox.style.display = 'none';
 
       try {
-        const payload = { api: 'admin', action: 'state', pin: pin };
+        const payload = { api: 'admin', action: 'unlock', pin: pin };
         const res = await fetch(API_EXEC_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -885,26 +885,21 @@
         });
         const data = await res.json();
 
-        if (data.status === 'ok' && data.state) {
+        if (data.status === 'ok') {
           currentAuthPin = pin;
           try { sessionStorage.setItem('mb_auth_pin', pin); } catch (e) {}
-          adminState = data.state;
 
-          // Lås opp grensesnittet
+          // Lås opp grensesnittet umiddelbart!
           document.getElementById('masterLockScreen').style.display = 'none';
           document.getElementById('appContainer').style.display = 'block';
 
-          // Populer dagens rapport og arkiv
-          loadedReports = adminState.reports || [];
-          if (loadedReports.length === 0 && adminState.latestReportHtml) {
+          // Populer dagens rapport med én gang
+          if (data.latestReportHtml) {
             loadedReports = [{
-              date: new Date().toISOString().substring(0, 10),
-              html: adminState.latestReportHtml
+              date: data.date || new Date().toISOString().substring(0, 10),
+              html: data.latestReportHtml
             }];
-          }
-
-          document.getElementById('archiveCount').textContent = loadedReports.length;
-          if (loadedReports.length > 0) {
+            document.getElementById('archiveCount').textContent = loadedReports.length;
             renderReport(0);
             renderArchiveList();
           } else {
@@ -915,16 +910,25 @@
               </div>`;
           }
 
-          // Populer telemetri og kildehelse
-          const t = adminState.telemetry || {};
-          document.getElementById('statSources').textContent = (adminState.sourcesMatrix ? adminState.sourcesMatrix.filter(s => s.active !== false).length : 62) + ' / ' + (adminState.sourcesMatrix ? adminState.sourcesMatrix.length : 62);
-          document.getElementById('statArticles').textContent = (t.briefing && t.briefing.totalArticles) ? t.briefing.totalArticles : 0;
-          document.getElementById('statCostToday').textContent = formatNok(t.todayCostNok);
-          document.getElementById('statCostMonth').textContent = formatNok(t.monthlyCostNok);
-          document.getElementById('bannerStatusText').textContent = 'Operativ (' + (adminState.sourcesMatrix ? adminState.sourcesMatrix.filter(s => s.active !== false).length : 62) + '/62 kilder)';
+          if (data.date) {
+            document.getElementById('bannerDate').textContent = formatDateNorwegian(data.date);
+          }
 
-          // Populer Kommandosentralen
-          renderAdminDashboard();
+          // Hent bakgrunnsdata for Kommandosentralen asynkront (uten å forsinke innloggingen)
+          sendSecureApi('state').then(stData => {
+            if (stData && stData.status === 'ok' && stData.state) {
+              adminState = stData.state;
+              const t = adminState.telemetry || {};
+              document.getElementById('statSources').textContent = (adminState.sourcesMatrix ? adminState.sourcesMatrix.filter(s => s.active !== false).length : 62) + ' / ' + (adminState.sourcesMatrix ? adminState.sourcesMatrix.length : 62);
+              document.getElementById('statArticles').textContent = (t.briefing && t.briefing.totalArticles) ? t.briefing.totalArticles : 0;
+              document.getElementById('statCostToday').textContent = formatNok(t.todayCostNok);
+              document.getElementById('statCostMonth').textContent = formatNok(t.monthlyCostNok);
+              document.getElementById('bannerStatusText').textContent = 'Operativ (' + (adminState.sourcesMatrix ? adminState.sourcesMatrix.filter(s => s.active !== false).length : 62) + '/62 kilder)';
+              renderAdminDashboard();
+            }
+          }).catch(e => {
+            console.warn('Bakgrunnssynkronisering av administrasjonsdata:', e);
+          });
 
         } else {
           if (!isAuto) {
@@ -937,7 +941,7 @@
         }
       } catch (netErr) {
         if (!isAuto) {
-          errBox.textContent = 'Tilkoblingsfeil mot sikker server: ' + netErr.message;
+          errBox.textContent = 'Tilkoblingsfeil mot sikker server. Prøv igjen om et øyeblikk.';
           errBox.style.display = 'block';
         }
         document.getElementById('masterLockScreen').style.display = 'flex';
