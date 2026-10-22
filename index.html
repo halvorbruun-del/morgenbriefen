@@ -1487,7 +1487,7 @@
 
       // Ukens fokus
       document.getElementById('weeklyFocusArea').value = adminState.weeklyFocus || '';
-      document.getElementById('weeklyFocusSavedAt').textContent = adminState.weeklyFocusUpdated ? ('Sist oppdatert: ' + adminState.weeklyFocusUpdated) : '';
+      document.getElementById('weeklyFocusSavedAt').textContent = adminState.weeklyFocusUpdated ? ('Sist oppdatert: ' + formatDateTimeNorwegian(adminState.weeklyFocusUpdated)) : '';
 
       // Prompt-minne
       const rules = adminState.activeLearnings || [];
@@ -1500,7 +1500,7 @@
             '<div>' +
               '<span class="src-lvl-badge badge-lvl-1">' + escapeHtml(r.category || 'Regel') + '</span> ' +
               '<span style="font-size:13.5px; font-weight:600; color:var(--text-main);">' + escapeHtml(r.rule) + '</span>' +
-              '<div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">Kilde: ' + escapeHtml(r.source || 'KI') + ' · ' + escapeHtml(r.date || '') + '</div>' +
+              '<div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">Kilde: ' + escapeHtml(r.source || 'KI') + ' · ' + escapeHtml(formatDateTimeNorwegian(r.date, r.source)) + '</div>' +
             '</div>' +
             '<button type="button" class="btn-secondary" onclick="archiveRule(\'' + escapeHtml(r.rule).replace(/'/g, "\\'") + '\')">Arkiver</button>' +
           '</div>';
@@ -1804,6 +1804,51 @@
       t.textContent = msg;
       t.style.display = 'block';
       setTimeout(() => { t.style.display = 'none'; }, 2600);
+    }
+
+    const NOR_MONTHS_ = ['jan.', 'feb.', 'mar.', 'apr.', 'mai', 'jun.', 'jul.', 'aug.', 'sep.', 'okt.', 'nov.', 'des.'];
+
+    function formatDateTimeNorwegian(val, source) {
+      if (!val) return '';
+      const str = String(val).trim();
+      const src = String(source || '').toLowerCase();
+      const defaultTime = (src.indexOf('ki') !== -1 || src.indexOf('evaluat') !== -1) ? 'kl. 07:00' : 'kl. 12:00';
+
+      // Hvis strengen allerede har norsk visningsformat: "20. okt. 2026 kl. 07:00"
+      if (/^\d{1,2}\.\s+[a-zæøå\.]+\s+\d{4}\s+kl\.\s+\d{2}:\d{2}/i.test(str)) {
+        return str;
+      }
+      if (/^\d{1,2}\.\d{2}\.\d{4}\s+kl\.\s+\d{2}:\d{2}/.test(str)) {
+        return str;
+      }
+
+      // YYYY-MM-DD eller YYYY-MM-DD HH:mm
+      const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);
+      if (isoMatch) {
+        const d = parseInt(isoMatch[3], 10);
+        const mon = NOR_MONTHS_[parseInt(isoMatch[2], 10) - 1] || '';
+        const y = isoMatch[1];
+        const time = (isoMatch[4] && isoMatch[5]) ? ('kl. ' + isoMatch[4] + ':' + isoMatch[5]) : defaultTime;
+        return d + '. ' + mon + ' ' + y + ' ' + time;
+      }
+
+      // Rå JavaScript-datostreng (f.eks. "Tue Oct 20 2026 00:00:00 GMT+0200...")
+      try {
+        const cleanStr = str.split('(')[0].trim();
+        const parsed = new Date(cleanStr);
+        if (!isNaN(parsed.getTime())) {
+          const d = parsed.getDate();
+          const mon = NOR_MONTHS_[parsed.getMonth()] || '';
+          const y = parsed.getFullYear();
+          const hasTime = parsed.getHours() !== 0 || parsed.getMinutes() !== 0;
+          const h = String(parsed.getHours()).padStart(2, '0');
+          const min = String(parsed.getMinutes()).padStart(2, '0');
+          const time = hasTime ? ('kl. ' + h + ':' + min) : defaultTime;
+          return d + '. ' + mon + ' ' + y + ' ' + time;
+        }
+      } catch (e) {}
+
+      return str;
     }
 
     function formatDateNorwegian(dateStr) {
