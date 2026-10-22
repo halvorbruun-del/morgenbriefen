@@ -2,10 +2,11 @@
 <html lang="no">
 <head>
   <meta charset="utf-8">
-  <title>Morgenbriefen – Utenriks- og sikkerhetspolitisk dagsanalyse</title>
+  <title>Morgenbriefen – Utenriks- og sikkerhetspolitisk analyse</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <meta name="description" content="Utenriks- og sikkerhetspolitisk dagsanalyse kuratert av Halvor Bruun. 62 kilder analysert med Gemini.">
+  <meta name="description" content="Utenriks- og sikkerhetspolitisk analyse. Lukket testmiljø.">
   <meta name="theme-color" content="#0F172A">
+  <meta name="robots" content="noindex, nofollow, noarchive">
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
 
@@ -51,7 +52,141 @@
       transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    /* Topplinje / Header */
+    /* =========================================================================
+       MASTER LOCK SCREEN (Airlock Gatekeeper)
+       ========================================================================= */
+    .lock-screen-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 25%, #1E293B 0%, #0F172A 70%, #070A10 100%);
+      padding: 20px;
+      box-sizing: border-box;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 9999;
+    }
+
+    .lock-card {
+      background: rgba(30, 41, 59, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 38px 32px;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      color: #F8FAFC;
+      animation: fadeInLock 0.3s ease;
+    }
+
+    @keyframes fadeInLock {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .lock-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60A5FA;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 18px;
+    }
+
+    .lock-title {
+      font-family: Georgia, Cambria, "Times New Roman", serif;
+      font-size: 30px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+      color: #FFFFFF;
+    }
+
+    .lock-sub {
+      font-size: 13.5px;
+      color: #94A3B8;
+      margin-bottom: 22px;
+    }
+
+    .lock-alert {
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 13px 15px;
+      font-size: 12.5px;
+      color: #CBD5E1;
+      line-height: 1.55;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .pin-input-wrap {
+      position: relative;
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    .pin-input-wrap label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #CBD5E1;
+      margin-bottom: 6px;
+    }
+
+    .pin-input-field {
+      width: 100%;
+      padding: 13px 44px 13px 14px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #FFFFFF;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .pin-input-field:focus {
+      border-color: #3B82F6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
+
+    .pin-eye-btn {
+      position: absolute;
+      right: 10px;
+      bottom: 11px;
+      background: none;
+      border: none;
+      color: #94A3B8;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+    }
+
+    .pin-eye-btn:hover { color: #FFFFFF; }
+
+    /* =========================================================================
+       MAIN APP STYLES
+       ========================================================================= */
+    #appContainer {
+      display: none;
+    }
+
     header {
       background: var(--bg-header);
       color: #FFFFFF;
@@ -98,36 +233,48 @@
 
     .header-actions {
       display: flex;
-      align-items: center;
       gap: 8px;
+      align-items: center;
     }
 
     .btn-icon {
       background: rgba(255, 255, 255, 0.08);
-      color: #F8FAFC;
       border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #FFFFFF;
       border-radius: 6px;
-      padding: 6px 10px;
-      font-size: 13px;
+      padding: 7px 12px;
+      font-size: 12.5px;
+      font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      transition: all 0.15s ease;
-      font-weight: 500;
+      gap: 5px;
+      transition: background 0.15s, border-color 0.15s;
     }
 
     .btn-icon:hover {
-      background: rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.3);
     }
 
-    /* Navigasjonsfaner */
+    .btn-lock {
+      background: rgba(220, 38, 38, 0.15);
+      border-color: rgba(220, 38, 38, 0.35);
+      color: #FCA5A5;
+    }
+
+    .btn-lock:hover {
+      background: rgba(220, 38, 38, 0.28);
+      border-color: rgba(220, 38, 38, 0.6);
+      color: #FFFFFF;
+    }
+
+    /* Fanemeny */
     .nav-bar {
       background: var(--bg-card);
       border-bottom: 1px solid var(--border-color);
-      padding: 8px 16px;
       position: sticky;
-      top: 57px;
+      top: 61px;
       z-index: 90;
     }
 
@@ -137,65 +284,54 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 0 16px;
     }
+
+    .nav-inner::-webkit-scrollbar { display: none; }
 
     .tabs {
       display: flex;
       gap: 4px;
-      overflow-x: auto;
-      scrollbar-width: none;
     }
 
-    .tabs::-webkit-scrollbar { display: none; }
-
     .tab-btn {
-      background: transparent;
+      background: none;
       border: none;
-      color: var(--text-muted);
+      border-bottom: 3px solid transparent;
+      padding: 13px 14px;
       font-size: 13.5px;
       font-weight: 600;
-      padding: 8px 12px;
-      border-radius: 6px;
+      color: var(--text-muted);
       cursor: pointer;
-      transition: all 0.15s ease;
       white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
     }
 
     .tab-btn:hover {
       color: var(--text-main);
-      background: rgba(0, 0, 0, 0.03);
     }
 
     .tab-btn.active {
       color: var(--primary);
-      background: #EFF6FF;
-    }
-
-    [data-theme="dark"] .tab-btn.active {
-      color: #60A5FA;
-      background: rgba(59, 130, 246, 0.15);
+      border-bottom-color: var(--primary);
     }
 
     .reader-controls {
       display: flex;
+      gap: 4px;
       align-items: center;
-      gap: 6px;
     }
 
     .zoom-btn {
-      background: transparent;
+      background: var(--bg-page);
       border: 1px solid var(--border-color);
-      color: var(--text-muted);
+      color: var(--text-main);
       border-radius: 4px;
-      width: 28px;
-      height: 28px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: bold;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 700;
       cursor: pointer;
     }
 
@@ -209,15 +345,15 @@
     .status-banner {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 12px 16px;
+      border-radius: 8px;
+      padding: 10px 14px;
       margin-bottom: 20px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      font-size: 12.5px;
+      gap: 12px;
       flex-wrap: wrap;
-      gap: 10px;
-      font-size: 13px;
     }
 
     .status-badge {
@@ -233,6 +369,7 @@
       height: 8px;
       border-radius: 50%;
       background: var(--success);
+      display: inline-block;
       box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
     }
 
@@ -240,33 +377,18 @@
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
       padding: 24px;
       margin-bottom: 20px;
-      overflow-wrap: break-word;
-      word-wrap: break-word;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
 
-    @media (max-width: 600px) {
-      .card { padding: 16px 14px; border-radius: 8px; }
-      .brand-title { font-size: 16px; }
+    /* Arkivliste */
+    .archive-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
-    /* Skjelett-laster */
-    .skeleton-bar {
-      height: 18px;
-      background: var(--border-color);
-      border-radius: 4px;
-      margin-bottom: 12px;
-      animation: pulse 1.5s infinite ease-in-out;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; }
-    }
-
-    /* Arkiv-liste */
-    .archive-list { display: flex; flex-direction: column; gap: 10px; }
     .archive-item {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
@@ -276,20 +398,27 @@
       justify-content: space-between;
       align-items: center;
       cursor: pointer;
-      transition: all 0.15s ease;
-      color: inherit;
-      text-decoration: none;
+      transition: border-color 0.15s, transform 0.1s;
     }
-    .archive-item:hover { border-color: var(--primary); transform: translateY(-1px); }
-    .archive-item.active { border-color: var(--primary); background: #EFF6FF; }
 
-    /* Telemetri & Stats */
+    .archive-item:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .archive-item.active {
+      border-left: 4px solid var(--primary);
+      background: rgba(11, 83, 148, 0.04);
+    }
+
+    /* Kildehelse & Statistikk */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       gap: 12px;
       margin-bottom: 20px;
     }
+
     .stat-box {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
@@ -297,82 +426,102 @@
       padding: 14px;
       text-align: center;
     }
-    .stat-val { font-size: 22px; font-weight: 800; color: var(--primary); margin-bottom: 2px; }
-    .stat-lbl { font-size: 12px; color: var(--text-muted); font-weight: 500; }
 
-    /* Handlingsknapper / Tester */
-    .btn-action-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 14px;
+    .stat-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary);
+      font-family: Georgia, Cambria, serif;
     }
+
+    .stat-lbl {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Knapper & Skjemaer */
     .btn-primary {
       background: var(--primary);
       color: #FFFFFF;
       border: none;
       border-radius: 8px;
-      padding: 12px 18px;
+      padding: 10px 18px;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      transition: all 0.15s ease;
-      text-decoration: none;
+      gap: 6px;
+      transition: background 0.15s;
     }
-    .btn-primary:hover { opacity: 0.92; }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .status-msg {
-      margin-top: 14px;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 13.5px;
-      display: none;
-      line-height: 1.5;
-    }
-    .status-msg.ok { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; display: block; }
-    .status-msg.err { background: #ffebee; color: #b71c1c; border: 1px solid #ffcdd2; display: block; }
-    .status-msg.info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; display: block; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* Skjema */
     .field { margin-bottom: 14px; }
-    .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: var(--text-main); }
-    .field input, .field textarea {
+    .field label { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; color: var(--text-main); }
+    .field input, .field textarea, .field select {
       width: 100%;
-      padding: 10px 12px;
+      padding: 9px 12px;
       border: 1px solid var(--border-color);
       border-radius: 6px;
       font-size: 14px;
       background: var(--bg-card);
       color: var(--text-main);
-      font-family: inherit;
+      box-sizing: border-box;
     }
 
-    /* Kilder */
-    .src-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
-    .src-item {
-      background: var(--bg-card);
+    .field input:focus, .field textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Kildegrid */
+    .src-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .src-chip {
+      background: var(--bg-page);
       border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 10px 14px;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      gap: 6px;
     }
+
     .src-lvl-badge {
       font-size: 10px;
       font-weight: 700;
       padding: 2px 6px;
       border-radius: 4px;
+      text-transform: uppercase;
     }
-    .badge-lvl-1 { background: #DBEAFE; color: #1E40AF; }
-    .badge-lvl-2 { background: #E0E7FF; color: #3730A3; }
-    .badge-lvl-3 { background: #FEF3C7; color: #92400E; }
+
+    .badge-lvl-1 { background: #DCFCE7; color: #166534; }
+    .badge-lvl-2 { background: #FEF3C7; color: #92400E; }
+    .badge-lvl-3 { background: #F1F5F9; color: #475569; }
+
+    .status-msg {
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .status-msg.ok { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; }
+    .status-msg.err { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
 
     /* Toast */
     #toast {
@@ -381,288 +530,310 @@
       right: 24px;
       background: #0F172A;
       color: #FFFFFF;
-      padding: 10px 18px;
+      padding: 12px 20px;
       border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
       font-size: 13.5px;
       font-weight: 600;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      z-index: 10000;
       display: none;
-      z-index: 1000;
+      animation: toastIn 0.2s ease;
+    }
+
+    @keyframes toastIn {
+      from { transform: translateY(12px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
 
     footer {
-      max-width: var(--container-max);
-      margin: 40px auto 0 auto;
-      padding: 24px 16px;
       border-top: 1px solid var(--border-color);
-      font-size: 12.5px;
-      color: var(--text-muted);
+      padding: 24px 16px;
       text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
       line-height: 1.6;
     }
   </style>
 </head>
 <body>
 
-  <!-- Topplinje -->
-  <header>
-    <div class="header-inner">
-      <a href="#" class="brand" onclick="switchTab('reader'); return false;">
-        <span class="brand-logo">🌐</span>
-        <div>
-          <div class="brand-title">Morgenbriefen</div>
-          <div class="brand-sub">Utenriks- og sikkerhetspolitisk dagsanalyse</div>
-        </div>
-      </a>
-      <div class="header-actions">
-        <button type="button" class="btn-icon" onclick="copyShareLink()" title="Del dagens Morgenbrief">
-          <span>🔗</span> Del
-        </button>
-        <button type="button" class="btn-icon" onclick="toggleTheme()" title="Veksle tema">
-          <span id="themeIcon">🌓</span>
-        </button>
+  <!-- =========================================================================
+       MASTER LOCK SCREEN (Airlock Gatekeeper)
+       ========================================================================= -->
+  <div id="masterLockScreen" class="lock-screen-container">
+    <div class="lock-card">
+      <div class="lock-badge">
+        <span>🔒</span> AUTORISERT ADGANGSPORTAL
       </div>
-    </div>
-  </header>
+      <h1 class="lock-title">Morgenbriefen</h1>
+      <p class="lock-sub">Utenriks- og sikkerhetspolitisk analyse</p>
+      
+      <div class="lock-alert">
+        Dette systemet er under lukket uttesting og er beskyttet mot uautorisert innsyn. Oppgi adgangskode for å dekryptere og åpne analysene.
+      </div>
 
-  <!-- Faner -->
-  <div class="nav-bar">
-    <div class="nav-inner">
-      <div class="tabs">
-        <button type="button" id="tabReader" class="tab-btn active" onclick="switchTab('reader')">📖 Dagens brief</button>
-        <button type="button" id="tabArchive" class="tab-btn" onclick="switchTab('archive')">🗂️ Arkiv (<span id="archiveCount">...</span>)</button>
-        <button type="button" id="tabStats" class="tab-btn" onclick="switchTab('stats')">📊 Status & Kilder</button>
-        <button type="button" id="tabAdmin" class="tab-btn" onclick="switchTab('admin')">🎛️ Kommandosentral & Test</button>
-      </div>
-      <div class="reader-controls" id="readerControls">
-        <button type="button" class="zoom-btn" onclick="changeFontSize(-1)" title="Mindre skrift">A-</button>
-        <button type="button" class="zoom-btn" onclick="changeFontSize(1)" title="Større skrift">A+</button>
-      </div>
+      <form onsubmit="handleMasterUnlock(event)">
+        <div class="pin-input-wrap">
+          <label for="masterPinInput">Adgangskode</label>
+          <input type="password" id="masterPinInput" class="pin-input-field" placeholder="Tast inn adgangskode..." required autofocus autocomplete="current-password">
+          <button type="button" class="pin-eye-btn" onclick="togglePasswordVisibility('masterPinInput', this)" title="Vis/skjul passord">👁️</button>
+        </div>
+
+        <button type="submit" id="masterUnlockBtn" class="btn-primary" style="width: 100%; padding: 13px; font-size: 15px;">
+          Lås opp Morgenbriefen
+        </button>
+
+        <div id="masterLockError" class="status-msg err"></div>
+      </form>
     </div>
   </div>
 
-  <main>
+  <!-- =========================================================================
+       HOVEDAPPLIKASJON (Vises KUN etter vellykket autentisering)
+       ========================================================================= -->
+  <div id="appContainer">
 
-    <!-- Statusstripe -->
-    <div class="status-banner">
-      <div class="status-badge">
-        <span class="status-dot"></span>
-        <span id="bannerStatusText">Operativ · Morgenbriefen nettverk</span>
+    <!-- Topplinje -->
+    <header>
+      <div class="header-inner">
+        <a href="#" class="brand" onclick="switchTab('reader'); return false;">
+          <span class="brand-logo">🌐</span>
+          <div>
+            <div class="brand-title">Morgenbriefen</div>
+            <div class="brand-sub">Utenriks- og sikkerhetspolitisk dagsanalyse</div>
+          </div>
+        </a>
+        <div class="header-actions">
+          <button type="button" class="btn-icon" onclick="copyShareLink()" title="Del lenke">
+            <span>🔗</span> Del
+          </button>
+          <button type="button" class="btn-icon" onclick="toggleTheme()" title="Veksle tema">
+            <span id="themeIcon">🌓</span>
+          </button>
+          <button type="button" class="btn-icon btn-lock" onclick="lockSystem()" title="Lås systemet nå">
+            <span>🔒</span> Lås
+          </button>
+        </div>
       </div>
-      <div style="color: var(--text-muted);" id="bannerDate">
-        Laster dato...
+    </header>
+
+    <!-- Fanemeny -->
+    <div class="nav-bar">
+      <div class="nav-inner">
+        <div class="tabs">
+          <button type="button" id="tabReader" class="tab-btn active" onclick="switchTab('reader')">📖 Dagens brief</button>
+          <button type="button" id="tabArchive" class="tab-btn" onclick="switchTab('archive')">🗂️ Arkiv (<span id="archiveCount">0</span>)</button>
+          <button type="button" id="tabStats" class="tab-btn" onclick="switchTab('stats')">📊 Status & Kilder</button>
+          <button type="button" id="tabAdmin" class="tab-btn" onclick="switchTab('admin')">🎛️ Kommandosentral & Test</button>
+        </div>
+        <div class="reader-controls" id="readerControls">
+          <button type="button" class="zoom-btn" onclick="changeFontSize(-1)" title="Mindre skrift">A-</button>
+          <button type="button" class="zoom-btn" onclick="changeFontSize(1)" title="Større skrift">A+</button>
+        </div>
       </div>
     </div>
 
-    <!-- Seksjon 1: Leser (Dagens utgave) -->
-    <section id="sectionReader">
-      <div class="card" id="reportContent">
-        <div class="skeleton-bar" style="width: 60%; height: 26px; margin-bottom: 20px;"></div>
-        <div class="skeleton-bar" style="width: 100%;"></div>
-        <div class="skeleton-bar" style="width: 95%;"></div>
-        <div class="skeleton-bar" style="width: 88%;"></div>
-        <div class="skeleton-bar" style="width: 70%; margin-bottom: 24px;"></div>
-        <div class="skeleton-bar" style="width: 45%; height: 20px; margin-bottom: 14px;"></div>
-        <div class="skeleton-bar" style="width: 100%;"></div>
-        <div class="skeleton-bar" style="width: 92%;"></div>
-      </div>
-    </section>
-
-    <!-- Seksjon 2: Arkiv -->
-    <section id="sectionArchive" style="display: none;">
-      <h2 style="font-size: 18px; margin-bottom: 14px; color: var(--text-main);">Tidligere utgaver</h2>
-      <div class="archive-list" id="archiveContainer">
-        <p style="color: var(--text-muted); padding: 20px; text-align: center;">Henter arkiv...</p>
-      </div>
-    </section>
-
-    <!-- Seksjon 3: Kildehelse & Status -->
-    <section id="sectionStats" style="display: none;">
-      <h2 style="font-size: 18px; margin-bottom: 14px; color: var(--text-main);">Driftsstatus & Kildehelse</h2>
-      
-      <div class="stats-grid">
-        <div class="stat-box">
-          <div class="stat-val" id="statSources">62 / 62</div>
-          <div class="stat-lbl">Operative RSS-kilder</div>
+    <main>
+      <!-- Driftsstripe -->
+      <div class="status-banner">
+        <div class="status-badge">
+          <span class="status-dot"></span>
+          <span id="bannerStatusText">Operativ · Sikret nettverk</span>
         </div>
-        <div class="stat-box">
-          <div class="stat-val" id="statArticles">0</div>
-          <div class="stat-lbl">Artikler skannet i dag</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-val" id="statCostToday">0,00 kr</div>
-          <div class="stat-lbl">Dagens KI-kostnad</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-val" id="statCostMonth">0,00 kr</div>
-          <div class="stat-lbl">Hittil i måneden</div>
+        <div style="color: var(--text-muted);" id="bannerDate">
+          Laster dato...
         </div>
       </div>
 
-      <div class="card" style="font-size: 13.5px; line-height: 1.6;">
-        <h3 style="font-size: 15px; margin-bottom: 8px; color: var(--primary);">Systeminformasjon</h3>
-        <p>• <b>KI-motor:</b> Google Gemini <code>gemini-3.8-flash</code> med utvidet resonnering (extended thinking).</p>
-        <p>• <b>Kildekorpus:</b> 62 utenriks- og sikkerhetspolitiske kilder på 3 epistemiske nivåer.</p>
-        <p>• <b>Illustrasjoner:</b> Lisensfrie bilder fra Wikimedia Commons (offentlig eiendom / Creative Commons).</p>
-        <p>• <b>Redaksjonsansvarlig:</b> Halvor Bruun.</p>
-      </div>
-    </section>
+      <!-- Seksjon 1: Leser (Dagens utgave) -->
+      <section id="sectionReader">
+        <div class="card" id="reportContent">
+          <!-- Rendres dynamisk fra backend etter autentisering -->
+        </div>
+      </section>
 
-    <!-- Seksjon 4: Kommandosentral & Test (Krever PIN) -->
-    <section id="sectionAdmin" style="display: none;">
-      
-      <!-- PIN Innlogging -->
-      <div class="card" id="adminPinCard">
-        <h2 style="margin-bottom: 6px;">🔒 Redaktør-adgang</h2>
-        <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 16px;">
-          Skriv inn PIN-koden for å åpne testfunksjoner, kildekontroll og abonnentstyring.
-        </p>
-        <form onsubmit="handleAdminLogin(event)">
-          <div class="field">
-            <label for="adminPinInput">PIN-kode</label>
-            <input type="password" id="adminPinInput" placeholder="••••••••" required autocomplete="off">
-          </div>
-          <button type="submit" id="adminPinBtn" class="btn-primary" style="width: 100%;">Lås opp Kommandosentral</button>
-          <div id="adminPinError" class="status-msg err"></div>
-        </form>
-      </div>
+      <!-- Seksjon 2: Arkiv -->
+      <section id="sectionArchive" style="display: none;">
+        <h2 style="font-size: 18px; margin-bottom: 14px; color: var(--text-main);">Tidligere utgaver</h2>
+        <div class="archive-list" id="archiveContainer">
+          <p style="color: var(--text-muted); padding: 20px; text-align: center;">Henter arkiv...</p>
+        </div>
+      </section>
 
-      <!-- Opplåst kommandosentral -->
-      <div id="adminDashboard" style="display: none;">
+      <!-- Seksjon 3: Kildehelse & Status -->
+      <section id="sectionStats" style="display: none;">
+        <h2 style="font-size: 18px; margin-bottom: 14px; color: var(--text-main);">Driftsstatus & Kildehelse</h2>
         
-        <!-- Hurtiglenker øverst -->
-        <div class="card" style="padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-          <div style="font-weight: 700; font-size: 15px; color: var(--text-main);">🎛️ Kommandosentralen er aktiv</div>
-          <div style="display: flex; gap: 8px;">
-            <a id="btnSheetLink" href="#" target="_blank" class="btn-icon" style="background: var(--primary); color: #FFF;">📊 Google Regneark ↗</a>
-            <a id="btnDriveLink" href="#" target="_blank" class="btn-icon" style="background: #334155; color: #FFF;">📁 Disk-arkiv ↗</a>
-            <button type="button" onclick="logoutAdmin()" class="btn-icon" style="background: #EF4444; color: #FFF;">Logg ut ✕</button>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-val" id="statSources">62 / 62</div>
+            <div class="stat-lbl">Operative RSS-kilder</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="statArticles">0</div>
+            <div class="stat-lbl">Artikler skannet i dag</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="statCostToday">0,00 kr</div>
+            <div class="stat-lbl">Dagens KI-kostnad</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="statCostMonth">0,00 kr</div>
+            <div class="stat-lbl">Hittil i måneden</div>
           </div>
         </div>
 
-        <!-- DE TRE TESTFUNKSJONENE -->
-        <div class="card">
-          <h2 style="margin-bottom: 4px;">🚀 Test & Verifikasjon</h2>
-          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 14px;">
-            Her kan du teste og trigge de tre kjernefunksjonene direkte utenom den faste tidsplanen:
-          </p>
-          <div class="btn-action-stack">
-            <button type="button" id="btnTestBrief" class="btn-primary" style="background-color: #0B5394;" onclick="triggerTest('test_brief', this, '🚀 Send test-morgenbrief til meg nå')">
-              🚀 Send test-morgenbrief til meg nå
-            </button>
-            <button type="button" id="btnTestEval" class="btn-primary" style="background-color: #14284B;" onclick="triggerTest('test_eval', this, '🔍 Kjør evaluering & teknisk driftsrapport nå')">
-              🔍 Kjør evaluering & teknisk driftsrapport nå
-            </button>
-            <button type="button" id="btnTestSentinel" class="btn-primary" style="background-color: #475569;" onclick="triggerTest('test_sentinel', this, '🛡️ Kjør Sentinel systemsjekk (Audit) nå')">
-              🛡️ Kjør Sentinel systemsjekk (Audit) nå
-            </button>
-          </div>
-          <div id="testStatusMsg" class="status-msg"></div>
+        <div class="card" style="font-size: 13.5px; line-height: 1.6;">
+          <h3 style="font-size: 15px; margin-bottom: 8px; color: var(--primary);">Systeminformasjon</h3>
+          <p>• <b>KI-motor:</b> Google Gemini <code>gemini-3.8-flash</code> med utvidet resonnering (extended thinking).</p>
+          <p>• <b>Kildekorpus:</b> 62 utenriks- og sikkerhetspolitiske kilder på 3 epistemiske nivåer.</p>
+          <p>• <b>Illustrasjoner:</b> Lisensfrie bilder fra Wikimedia Commons (offentlig eiendom / Creative Commons).</p>
+          <p>• <b>Redaksjonsansvarlig:</b> Halvor Bruun.</p>
         </div>
+      </section>
 
-        <!-- Ukens Fokus-hypotese -->
-        <div class="card">
-          <h2 style="margin-bottom: 4px;">🎯 Ukens fokus-hypotese (Dypanalyse-bro)</h2>
-          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">
-            Dette strategiske fokuset styrer hvilke hypoteser Morgenbriefen og Dypanalyse skal prioritere denne uken.
-          </p>
-          <div class="field">
-            <textarea id="weeklyFocusArea" rows="3" placeholder="F.eks.: Eskalering i Rødehavet og konsekvenser for europeiske forsyningskjeder..."></textarea>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-            <button type="button" class="btn-primary" onclick="saveWeeklyFocus()">💾 Lagre ukens fokus</button>
-            <span id="weeklyFocusSavedAt" style="font-size: 12px; color: var(--text-muted);"></span>
-          </div>
-        </div>
-
-        <!-- Redaksjonelt prompt-minne -->
-        <div class="card">
-          <h2 style="margin-bottom: 4px;">🧠 Redaksjonelt prompt-minne</h2>
-          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 14px;">
-            Aktive lærdommer og kvalitetsregler som overføres til Gemini i hver eneste dagsbrief.
-          </p>
-          <div id="learningsList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
-            <p style="color: var(--text-muted); font-size: 13px;">Laster aktive regler...</p>
-          </div>
+      <!-- Seksjon 4: Kommandosentral & Test (Automatisk tilgjengelig når portalen er låst opp) -->
+      <section id="sectionAdmin" style="display: none;">
+        
+        <div id="adminDashboard">
           
-          <details style="background: #F8FAFC; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
-            <summary style="font-weight: 600; font-size: 13.5px; cursor: pointer; color: var(--primary);">+ Legg til en ny regel manuelt</summary>
-            <div style="margin-top: 12px;">
-              <div class="field">
-                <label>Kategori</label>
-                <input type="text" id="newRuleCat" placeholder="Kildekritikk, Språk, Vurdering...">
-              </div>
-              <div class="field">
-                <label>Instruks til Gemini</label>
-                <input type="text" id="newRuleText" placeholder="Skriv konkret instruks...">
-              </div>
-              <button type="button" class="btn-primary" onclick="addNewRule()">Legg til regel i minnet</button>
+          <!-- Hurtiglenker -->
+          <div class="card" style="padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="font-weight: 700; font-size: 15px; color: var(--text-main);">🎛️ Kommandosentralen er aktiv</div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <a id="btnSheetLink" href="#" target="_blank" class="btn-icon" style="background: var(--primary); color: #FFF;">📊 Google Regneark ↗</a>
+              <a id="btnDriveLink" href="#" target="_blank" class="btn-icon" style="background: #334155; color: #FFF;">📁 Disk-arkiv ↗</a>
             </div>
-          </details>
-        </div>
-
-        <!-- Kildekontroll-matrise -->
-        <div class="card">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-            <h2>📡 Kildekontroll-matrise (<span id="adminSourceTotal">62</span>)</h2>
-            <input type="text" id="srcSearchInput" oninput="filterSources()" placeholder="Søk i kilder..." style="padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; width: 180px;">
-          </div>
-          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">
-            Her kan du sette individuelle kilder på pause eller aktivere dem igjen.
-          </p>
-          <div id="sourcesContainer" class="src-grid">
-            <p style="color: var(--text-muted); font-size: 13px;">Laster kilder...</p>
-          </div>
-        </div>
-
-        <!-- Abonnentliste -->
-        <div class="card">
-          <h2>👥 Abonnenter (<span id="subCount">...</span>)</h2>
-          <div id="subsContainer" style="display: flex; flex-direction: column; gap: 8px; margin: 12px 0;">
-            <p style="color: var(--text-muted); font-size: 13px;">Laster abonnenter...</p>
           </div>
 
-          <details style="background: #F8FAFC; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-top: 14px;">
-            <summary style="font-weight: 600; font-size: 13.5px; cursor: pointer; color: var(--primary);">+ Legg til ny abonnent</summary>
-            <div style="margin-top: 12px;">
-              <div class="field"><label>E-post *</label><input type="email" id="newSubEmail" required placeholder="navn@eksempel.no"></div>
-              <div class="field"><label>Fornavn</label><input type="text" id="newSubFirst" placeholder="Fornavn"></div>
-              <div class="field"><label>Etternavn</label><input type="text" id="newSubLast" placeholder="Etternavn"></div>
-              <button type="button" class="btn-primary" onclick="addNewSubscriber()">Legg til i Google Regneark</button>
+          <!-- Testfunksjoner -->
+          <div class="card">
+            <h2 style="margin-bottom: 6px;">⚡ Manuell testkjøring & Driftskontroll</h2>
+            <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 16px;">
+              Kjør systemets 3 kjerneprosesser manuelt for å teste e-postutsending, Gemini-evaluering eller systemhelse:
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <button type="button" id="btnTestBrief" class="btn-primary" style="background-color: #0B5394;" onclick="triggerTest('test_brief', this, '📧 Send test-morgenbrief til meg nå')">
+                📧 Send test-morgenbrief til meg nå
+              </button>
+              <button type="button" id="btnTestEval" class="btn-primary" style="background-color: #14284B;" onclick="triggerTest('test_eval', this, '🧠 Kjør evaluering & teknisk driftsrapport nå')">
+                🧠 Kjør evaluering & teknisk driftsrapport nå
+              </button>
+              <button type="button" id="btnTestSentinel" class="btn-primary" style="background-color: #475569;" onclick="triggerTest('test_sentinel', this, '🛡️ Kjør Sentinel systemsjekk (Audit) nå')">
+                🛡️ Kjør Sentinel systemsjekk (Audit) nå
+              </button>
             </div>
-          </details>
+            <div id="testStatusMsg" class="status-msg"></div>
+          </div>
+
+          <!-- Sikkerhet & Passordendring -->
+          <div class="card">
+            <h2 style="margin-bottom: 6px;">🔐 Sikkerhet & Endre adgangskode</h2>
+            <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 16px;">
+              Du kan når som helst endre adgangskoden til Morgenbriefen her. Koden oppdateres kryptert i Google-skyen.
+            </p>
+            <form onsubmit="handleChangePin(event)" style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <input type="password" id="newPinInput" placeholder="Ny adgangskode (minst 8 tegn)..." required style="flex: 1; min-width: 220px; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px;">
+              <button type="submit" id="changePinBtn" class="btn-primary">Oppdater adgangskode</button>
+            </form>
+            <div id="changePinMsg" class="status-msg"></div>
+          </div>
+
+          <!-- Ukens fokus -->
+          <div class="card">
+            <h2 style="margin-bottom: 6px;">🎯 Ukens strategiske fokus</h2>
+            <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 12px;">
+              Styrer hvilke temaer Gemini og Dypanalyse skal prioritere denne uken.
+            </p>
+            <textarea id="weeklyFocusArea" rows="3" placeholder="F.eks.: Eskalering i Rødehavet og konsekvenser for europeiske forsyningskjeder..." style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; font-family: inherit; margin-bottom: 10px;"></textarea>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <button type="button" class="btn-primary" onclick="saveWeeklyFocus()">Lagre fokus</button>
+              <span id="weeklyFocusSavedAt" style="font-size: 12px; color: var(--text-muted);"></span>
+            </div>
+          </div>
+
+          <!-- Selvlæring & Prompt-minne -->
+          <div class="card">
+            <h2 style="margin-bottom: 6px;">🧠 Selvlæring & Prompt-minne</h2>
+            <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 14px;">
+              Regler som Gemini automatisk har lært under evalueringene, eller som du har lagt til manuelt:
+            </p>
+            <div id="learningsList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+              <p style="color: var(--text-muted); font-size: 13px;">Henter regler...</p>
+            </div>
+
+            <div style="border-top: 1px solid var(--border-color); padding-top: 14px;">
+              <h4 style="font-size: 13.5px; margin-bottom: 8px;">Legg til ny redaktørregel manuelt:</h4>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <input type="text" id="newRuleCat" placeholder="Kategori (Kildekritikk, Språk...)" style="width: 160px; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
+                <input type="text" id="newRuleText" placeholder="Skriv konkret instruks til Gemini..." style="flex: 1; min-width: 200px; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
+                <button type="button" class="btn-primary" onclick="addNewRule()">Legg til regel</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kildekontroll -->
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <h2>📡 Kildekontroll-matrise (<span id="adminSourceTotal">62</span>)</h2>
+              <input type="text" id="srcSearchInput" oninput="filterSources()" placeholder="Søk i kilder..." style="padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; width: 180px;">
+            </div>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">
+              Klikk på en kilde for å midlertidig deaktivere eller reaktivere den i neste innsamling.
+            </p>
+            <div id="sourcesContainer" class="src-grid">
+              <p style="color: var(--text-muted); font-size: 13px;">Laster kildematrise...</p>
+            </div>
+          </div>
+
+          <!-- Abonnenter -->
+          <div class="card">
+            <h2>👥 Abonnenter (<span id="subCount">0</span>)</h2>
+            <div id="subsContainer" style="display: flex; flex-direction: column; gap: 8px; margin: 12px 0;">
+              <p style="color: var(--text-muted); font-size: 13px;">Laster abonnenter...</p>
+            </div>
+
+            <div style="border-top: 1px solid var(--border-color); padding-top: 14px; margin-top: 14px;">
+              <h4 style="font-size: 13.5px; margin-bottom: 8px;">Meld på ny abonnent:</h4>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-bottom: 10px;">
+                <div class="field"><label>E-post *</label><input type="email" id="newSubEmail" required placeholder="navn@eksempel.no"></div>
+                <div class="field"><label>Fornavn</label><input type="text" id="newSubFirst" placeholder="Fornavn"></div>
+                <div class="field"><label>Etternavn</label><input type="text" id="newSubLast" placeholder="Etternavn"></div>
+              </div>
+              <button type="button" class="btn-primary" onclick="addNewSubscriber()">Meld på abonnent</button>
+            </div>
+          </div>
+
         </div>
+      </section>
 
-      </div>
-    </section>
+    </main>
 
-  </main>
+    <!-- Bunntekst -->
+    <footer>
+      <p><b>Morgenbriefen</b> · Utgitt av Halvor Bruun</p>
+      <p style="margin-top: 4px;">Utenriks- og sikkerhetspolitisk analyse generert med kunstig intelligens fra åpne fagmedier og tenketanker.</p>
+    </footer>
 
-  <!-- Bunntekst -->
-  <footer>
-    <p><b>Morgenbriefen</b> · Utgitt av Halvor Bruun</p>
-    <p style="margin-top: 4px;">Utenriks- og sikkerhetspolitisk analyse generert med kunstig intelligens fra åpne fagmedier og tenketanker.</p>
-  </footer>
+  </div>
 
   <div id="toast">Lenke kopiert til utklippstavlen!</div>
 
   <script>
     const API_EXEC_URL = 'https://script.google.com/macros/s/AKfycbwul6JKlHphAInK8aRglGSwuOi2WtxwQ6D9vExBYM25moAOop3cHEBto8yQOgvhzDTg/exec';
-    const API_REPORTS_URL = API_EXEC_URL + '?api=reports';
-    const API_META_URL = API_EXEC_URL + '?api=meta';
 
     let loadedReports = [];
     let currentReportIndex = 0;
     let baseFontSize = 16;
-    let currentAdminPin = '';
+    let currentAuthPin = '';
     let adminState = null;
 
-    // Sikker overføring av administrative forespørsler via HTTP POST i body (aldri i URL)
-    async function sendAdminApi(action, extraData = {}) {
+    // Send sikre HTTP POST-forespørsler der passordet ligger i payload body (aldri i URL)
+    async function sendSecureApi(action, extraData = {}) {
       const payload = {
         api: 'admin',
         action: action,
-        pin: currentAdminPin,
+        pin: currentAuthPin,
         ...extraData
       };
       const res = await fetch(API_EXEC_URL, {
@@ -673,51 +844,125 @@
       return await res.json();
     }
 
-    async function initApp() {
-      loadMeta();
-      await loadReports();
-      checkSavedPin();
-    }
-
-    async function loadMeta() {
+    // Initialisering: Sjekker om det finnes en aktiv økt i sessionStorage
+    function initApp() {
       try {
-        const res = await fetch(API_META_URL);
-        const data = await res.json();
-        if (data && data.status === 'ok') {
-          document.getElementById('statSources').textContent = (data.operativeFeeds || 62) + ' / ' + (data.totalFeeds || 62);
-          document.getElementById('statArticles').textContent = data.totalArticles || 0;
-          document.getElementById('statCostToday').textContent = formatNok(data.todayCostNok);
-          document.getElementById('statCostMonth').textContent = formatNok(data.monthlyCostNok);
-          document.getElementById('bannerStatusText').textContent = 'Operativ (' + (data.operativeFeeds || 62) + '/' + (data.totalFeeds || 62) + ' kilder)';
+        const savedPin = sessionStorage.getItem('mb_auth_pin');
+        if (savedPin) {
+          unlockSystem(savedPin, true);
+          return;
         }
-      } catch (e) {
-        console.warn('Kunne ikke hente telemetri:', e);
-      }
+      } catch (e) {}
+
+      // Ingen aktiv økt: Lås skjermen og fokuser passordfeltet
+      document.getElementById('masterLockScreen').style.display = 'flex';
+      document.getElementById('appContainer').style.display = 'none';
+      setTimeout(() => {
+        const inp = document.getElementById('masterPinInput');
+        if (inp) inp.focus();
+      }, 100);
     }
 
-    async function loadReports() {
-      const container = document.getElementById('reportContent');
+    async function handleMasterUnlock(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const pin = document.getElementById('masterPinInput').value.trim();
+      if (!pin) return;
+      await unlockSystem(pin, false);
+    }
+
+    async function unlockSystem(pin, isAuto) {
+      const btn = document.getElementById('masterUnlockBtn');
+      const errBox = document.getElementById('masterLockError');
+      if (btn) { btn.disabled = true; btn.textContent = 'Verifiserer autorisasjon…'; }
+      if (errBox) errBox.style.display = 'none';
+
       try {
-        const res = await fetch(API_REPORTS_URL);
+        const payload = { api: 'admin', action: 'state', pin: pin };
+        const res = await fetch(API_EXEC_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
         const data = await res.json();
-        if (data && data.status === 'ok' && data.reports && data.reports.length > 0) {
-          loadedReports = data.reports;
+
+        if (data.status === 'ok' && data.state) {
+          currentAuthPin = pin;
+          try { sessionStorage.setItem('mb_auth_pin', pin); } catch (e) {}
+          adminState = data.state;
+
+          // Lås opp grensesnittet
+          document.getElementById('masterLockScreen').style.display = 'none';
+          document.getElementById('appContainer').style.display = 'block';
+
+          // Populer dagens rapport og arkiv
+          loadedReports = adminState.reports || [];
+          if (loadedReports.length === 0 && adminState.latestReportHtml) {
+            loadedReports = [{
+              date: new Date().toISOString().substring(0, 10),
+              html: adminState.latestReportHtml
+            }];
+          }
+
           document.getElementById('archiveCount').textContent = loadedReports.length;
-          renderReport(0);
-          renderArchiveList();
+          if (loadedReports.length > 0) {
+            renderReport(0);
+            renderArchiveList();
+          } else {
+            document.getElementById('reportContent').innerHTML = `
+              <div style="text-align:center; padding:32px 16px; color:#64748B;">
+                <h3 style="color:var(--text-main); margin-bottom:8px;">Ingen rapport funnet</h3>
+                <p>Neste utgave blir tilgjengelig her så snart den er sendt ut kl. 05:00.</p>
+              </div>`;
+          }
+
+          // Populer telemetri og kildehelse
+          const t = adminState.telemetry || {};
+          document.getElementById('statSources').textContent = (adminState.sourcesMatrix ? adminState.sourcesMatrix.filter(s => s.active !== false).length : 62) + ' / ' + (adminState.sourcesMatrix ? adminState.sourcesMatrix.length : 62);
+          document.getElementById('statArticles').textContent = (t.briefing && t.briefing.totalArticles) ? t.briefing.totalArticles : 0;
+          document.getElementById('statCostToday').textContent = formatNok(t.todayCostNok);
+          document.getElementById('statCostMonth').textContent = formatNok(t.monthlyCostNok);
+          document.getElementById('bannerStatusText').textContent = 'Operativ (' + (adminState.sourcesMatrix ? adminState.sourcesMatrix.filter(s => s.active !== false).length : 62) + '/62 kilder)';
+
+          // Populer Kommandosentralen
+          renderAdminDashboard();
+
         } else {
-          container.innerHTML = '<div style="text-align:center; padding:32px 16px; color:#64748B;">' +
-            '<h3 style="color:var(--text-main); margin-bottom:8px;">Ingen rapport funnet</h3>' +
-            '<p>Neste utgave blir tilgjengelig her så snart den er sendt ut kl. 05:00.</p>' +
-            '</div>';
+          if (!isAuto) {
+            errBox.textContent = data.message || 'Feil adgangskode.';
+            errBox.style.display = 'block';
+          }
+          try { sessionStorage.removeItem('mb_auth_pin'); } catch (e) {}
+          document.getElementById('masterLockScreen').style.display = 'flex';
+          document.getElementById('appContainer').style.display = 'none';
         }
-      } catch (err) {
-        container.innerHTML = '<div style="text-align:center; padding:32px 16px; color:#DC2626;">' +
-          '<h3 style="margin-bottom:8px;">Kunne ikke laste Morgenbriefen</h3>' +
-          '<p style="color:var(--text-muted); font-size:14px;">' + err.message + '</p>' +
-          '<button onclick="loadReports()" style="margin-top:14px; background:#0B5394; color:#FFF; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">Prøv igjen</button>' +
-          '</div>';
+      } catch (netErr) {
+        if (!isAuto) {
+          errBox.textContent = 'Tilkoblingsfeil mot sikker server: ' + netErr.message;
+          errBox.style.display = 'block';
+        }
+        document.getElementById('masterLockScreen').style.display = 'flex';
+        document.getElementById('appContainer').style.display = 'none';
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Lås opp Morgenbriefen'; }
       }
+    }
+
+    // Lås systemet umiddelbart og tøm minnet
+    function lockSystem() {
+      currentAuthPin = '';
+      adminState = null;
+      loadedReports = [];
+      try { sessionStorage.removeItem('mb_auth_pin'); } catch (e) {}
+
+      document.getElementById('reportContent').innerHTML = '';
+      document.getElementById('archiveContainer').innerHTML = '';
+      document.getElementById('appContainer').style.display = 'none';
+      document.getElementById('masterLockScreen').style.display = 'flex';
+      document.getElementById('masterPinInput').value = '';
+      document.getElementById('masterLockError').style.display = 'none';
+      setTimeout(() => {
+        document.getElementById('masterPinInput').focus();
+      }, 50);
     }
 
     function renderReport(index) {
@@ -742,7 +987,7 @@
     function renderArchiveList() {
       const container = document.getElementById('archiveContainer');
       if (!loadedReports.length) {
-        container.innerHTML = '<p style="color:var(--text-muted);">Ingen arkivrapporter funnet.</p>';
+        container.innerHTML = '<p style="color:var(--text-muted); text-align:center;">Ingen arkivrapporter funnet.</p>';
         return;
       }
       container.innerHTML = loadedReports.map((r, idx) => {
@@ -778,74 +1023,8 @@
     }
 
     // =========================================================================
-    // REDAKTØR & KOMMANDOSENTRAL LOGIKK (100 % SIKRET MED POST & CRYPTO)
+    // REDAKTØR & KOMMANDOSENTRAL LOGIKK
     // =========================================================================
-    function checkSavedPin() {
-      try {
-        const saved = localStorage.getItem('mb_admin_pin');
-        if (saved) {
-          currentAdminPin = saved;
-          unlockAdmin(saved, true);
-        }
-      } catch (e) {}
-    }
-
-    async function handleAdminLogin(e) {
-      if (e && e.preventDefault) e.preventDefault();
-      const pin = document.getElementById('adminPinInput').value.trim();
-      if (!pin) return;
-      await unlockAdmin(pin, false);
-    }
-
-    async function unlockAdmin(pin, isAuto) {
-      const btn = document.getElementById('adminPinBtn');
-      const errBox = document.getElementById('adminPinError');
-      if (btn) { btn.disabled = true; btn.textContent = 'Verifiserer redaktør-PIN...'; }
-      if (errBox) errBox.style.display = 'none';
-
-      try {
-        const payload = { api: 'admin', action: 'state', pin: pin };
-        const res = await fetch(API_EXEC_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (data.status === 'ok') {
-          currentAdminPin = pin;
-          try { localStorage.setItem('mb_admin_pin', pin); } catch (e) {}
-          adminState = data.state;
-          document.getElementById('adminPinCard').style.display = 'none';
-          document.getElementById('adminDashboard').style.display = 'block';
-          document.getElementById('tabAdmin').textContent = '🎛️ Kommandosentral';
-          renderAdminDashboard();
-        } else {
-          if (!isAuto) {
-            errBox.textContent = data.message || 'Feil PIN-kode.';
-            errBox.style.display = 'block';
-          }
-          try { localStorage.removeItem('mb_admin_pin'); } catch (e) {}
-        }
-      } catch (netErr) {
-        if (!isAuto) {
-          errBox.textContent = 'Tilkoblingsfeil: ' + netErr.message;
-          errBox.style.display = 'block';
-        }
-      } finally {
-        if (btn) { btn.disabled = false; btn.textContent = 'Lås opp Kommandosentral'; }
-      }
-    }
-
-    function logoutAdmin() {
-      currentAdminPin = '';
-      adminState = null;
-      try { localStorage.removeItem('mb_admin_pin'); } catch (e) {}
-      document.getElementById('adminDashboard').style.display = 'none';
-      document.getElementById('adminPinCard').style.display = 'block';
-      document.getElementById('adminPinInput').value = '';
-      document.getElementById('tabAdmin').textContent = '🎛️ Kommandosentral & Test';
-    }
-
     function renderAdminDashboard() {
       if (!adminState) return;
 
@@ -868,7 +1047,7 @@
         rulesContainer.innerHTML = '<p style="color:var(--text-muted); font-size:13px;">Ingen aktive redaktørregler i minnet.</p>';
       } else {
         rulesContainer.innerHTML = rules.map(r => {
-          return '<div style="background:#F8FAFC; border:1px solid var(--border-color); border-radius:6px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px;">' +
+          return '<div style="background:var(--bg-page); border:1px solid var(--border-color); border-radius:6px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px;">' +
             '<div>' +
               '<span class="src-lvl-badge badge-lvl-1">' + escapeHtml(r.category || 'Regel') + '</span> ' +
               '<span style="font-size:13.5px; font-weight:600; color:var(--text-main);">' + escapeHtml(r.rule) + '</span>' +
@@ -892,110 +1071,128 @@
         subContainer.innerHTML = subs.map(s => {
           const name = [s.firstName, s.lastName].filter(Boolean).join(' ') || s.email;
           const isAct = s.active !== false;
-          return '<div style="background:#F8FAFC; border:1px solid var(--border-color); border-radius:6px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">' +
+          return '<div style="background:var(--bg-page); border:1px solid var(--border-color); border-radius:6px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">' +
             '<div>' +
               '<div style="font-weight:600; font-size:13px;">' + escapeHtml(name) + ' ' + (isAct ? '<span style="color:#059669; font-size:11px;">● Aktiv</span>' : '<span style="color:#DC2626; font-size:11px;">⏸ Pauset</span>') + '</div>' +
               '<div style="font-size:11.5px; color:var(--text-muted);">' + escapeHtml(s.email) + '</div>' +
             '</div>' +
             '<div style="display:flex; gap:6px;">' +
-              '<button type="button" onclick="toggleSub(\'' + escapeHtml(s.email) + '\', ' + (!isAct) + ')" style="background:transparent; border:1px solid var(--border-color); border-radius:4px; padding:3px 8px; font-size:11px; cursor:pointer;">' + (isAct ? 'Pause' : 'Aktiver') + '</button>' +
-              '<button type="button" onclick="removeSub(\'' + escapeHtml(s.email) + '\')" style="background:#FEE2E2; color:#DC2626; border:none; border-radius:4px; padding:3px 8px; font-size:11px; cursor:pointer;">Fjern</button>' +
+              '<button type="button" onclick="toggleSub(\'' + escapeHtml(s.email) + '\', ' + !isAct + ')" style="background:#E2E8F0; border:none; border-radius:4px; padding:4px 8px; font-size:11px; cursor:pointer;">' + (isAct ? 'Pause' : 'Aktiver') + '</button>' +
+              '<button type="button" onclick="removeSub(\'' + escapeHtml(s.email) + '\')" style="background:#FEE2E2; color:#DC2626; border:none; border-radius:4px; padding:4px 8px; font-size:11px; cursor:pointer;">Slett</button>' +
             '</div>' +
           '</div>';
         }).join('');
       }
     }
 
-    function renderSourcesList() {
-      const sources = adminState.sourcesMatrix || [];
-      document.getElementById('adminSourceTotal').textContent = sources.length;
+    function renderSourcesList(filter = '') {
+      const matrix = adminState.sourcesMatrix || [];
+      document.getElementById('adminSourceTotal').textContent = matrix.length;
       const container = document.getElementById('sourcesContainer');
-      const query = (document.getElementById('srcSearchInput').value || '').toLowerCase();
-
-      const filtered = sources.filter(s => {
-        if (!query) return true;
-        return (s.name || '').toLowerCase().includes(query) || (s.categoryName || '').toLowerCase().includes(query);
-      });
-
+      const filtered = matrix.filter(s => !filter || s.name.toLowerCase().includes(filter.toLowerCase()));
       if (!filtered.length) {
-        container.innerHTML = '<p style="color:var(--text-muted); font-size:13px;">Ingen kilder matcher søket.</p>';
+        container.innerHTML = '<p style="color:var(--text-muted); font-size:13px;">Ingen kilder matchet søket.</p>';
         return;
       }
-
       container.innerHTML = filtered.map(s => {
-        const isPaused = !s.active;
-        const lvlClass = 'badge-lvl-' + (s.level || 2);
-        return '<div class="src-item">' +
-          '<div>' +
-            '<div style="display:flex; align-items:center; gap:6px;">' +
-              '<span class="src-lvl-badge ' + lvlClass + '">NIVÅ ' + (s.level || 2) + '</span>' +
-              '<span style="font-weight:600; font-size:13px; color:var(--text-main);">' + escapeHtml(s.name) + '</span>' +
-            '</div>' +
-            '<div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">' + escapeHtml(s.categoryName || s.category) + ' · ' + (isPaused ? '<span style="color:#DC2626;">Pauset</span>' : '<span style="color:#059669;">Operativ</span>') + '</div>' +
+        const isAct = s.active !== false;
+        const lvlClass = s.tier === 1 ? 'badge-lvl-1' : (s.tier === 2 ? 'badge-lvl-2' : 'badge-lvl-3');
+        return '<div class="src-chip" style="opacity:' + (isAct ? '1' : '0.5') + ';">' +
+          '<div style="display:flex; align-items:center; gap:6px; overflow:hidden;">' +
+            '<span class="src-lvl-badge ' + lvlClass + '">N' + s.tier + '</span>' +
+            '<span style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + escapeHtml(s.name) + '">' + escapeHtml(s.name) + '</span>' +
           '</div>' +
-          '<button type="button" onclick="toggleSource(\'' + escapeHtml(s.name).replace(/'/g, "\\'") + '\', ' + isPaused + ')" style="background:' + (isPaused ? '#059669' : '#F1F5F9') + '; color:' + (isPaused ? '#FFF' : 'var(--text-main)') + '; border:1px solid var(--border-color); border-radius:4px; padding:4px 10px; font-size:11.5px; font-weight:600; cursor:pointer;">' +
-            (isPaused ? '▶️ Aktiver' : '⏸️ Pause') +
-          '</button>' +
+          '<input type="checkbox" ' + (isAct ? 'checked' : '') + ' onchange="toggleSource(\'' + escapeHtml(s.name).replace(/'/g, "\\'") + '\', this.checked)">' +
         '</div>';
       }).join('');
     }
 
     function filterSources() {
-      renderSourcesList();
+      const q = document.getElementById('srcSearchInput').value.trim();
+      renderSourcesList(q);
     }
 
-    // =========================================================================
-    // DE TRE TESTFUNKSJONENE (SENDES TRYGT VIA HTTP POST BODY)
-    // =========================================================================
     async function triggerTest(action, btn, originalText) {
-      if (!currentAdminPin) {
-        alert('Du må være innlogget med PIN for å kjøre tester.');
-        return;
-      }
-
-      const statusBox = document.getElementById('testStatusMsg');
+      const msgBox = document.getElementById('testStatusMsg');
       btn.disabled = true;
-      btn.textContent = 'Kjører test... (vennligst vent)';
-      statusBox.textContent = 'Behandler forespørsel mot skyen... Dette tar normalt 10–30 sekunder mens Gemini og kildene behandles.';
-      statusBox.className = 'status-msg info';
+      btn.textContent = '⏳ Utfører kjøring… Vennligst vent…';
+      msgBox.style.display = 'none';
 
       try {
-        const data = await sendAdminApi(action);
-        if (data.status === 'ok') {
-          statusBox.textContent = '✅ ' + (data.message || 'Fullført med suksess!');
-          statusBox.className = 'status-msg ok';
-        } else {
-          statusBox.textContent = '❌ Feil under test: ' + (data.message || 'Ukjent feil');
-          statusBox.className = 'status-msg err';
-        }
-      } catch (err) {
-        statusBox.textContent = '❌ Nettverksfeil under test: ' + err.message;
-        statusBox.className = 'status-msg err';
+        const data = await sendSecureApi(action);
+        msgBox.textContent = data.message || 'Handlingen ble fullført!';
+        msgBox.className = 'status-msg ' + (data.status === 'ok' ? 'ok' : 'err');
+        msgBox.style.display = 'block';
+      } catch (e) {
+        msgBox.textContent = 'Feil: ' + e.message;
+        msgBox.className = 'status-msg err';
+        msgBox.style.display = 'block';
       } finally {
         btn.disabled = false;
         btn.textContent = originalText;
       }
     }
 
+    async function handleChangePin(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const newPin = document.getElementById('newPinInput').value.trim();
+      const msgBox = document.getElementById('changePinMsg');
+      const btn = document.getElementById('changePinBtn');
+
+      if (!newPin || newPin.length < 8) {
+        alert('Ny adgangskode må være minst 8 tegn lang.');
+        return;
+      }
+      if (!confirm('Er du sikker på at du vil oppdatere adgangskoden? Husk å ta vare på det nye passordet!')) {
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Oppdaterer…';
+      try {
+        const data = await sendSecureApi('change_pin', { newPin: newPin });
+        if (data.status === 'ok') {
+          currentAuthPin = newPin;
+          try { sessionStorage.setItem('mb_auth_pin', newPin); } catch (e) {}
+          document.getElementById('newPinInput').value = '';
+          msgBox.textContent = '✅ Adgangskoden er oppdatert i skyen!';
+          msgBox.className = 'status-msg ok';
+          msgBox.style.display = 'block';
+          showToastMsg('Ny adgangskode lagret!');
+        } else {
+          msgBox.textContent = 'Feil: ' + data.message;
+          msgBox.className = 'status-msg err';
+          msgBox.style.display = 'block';
+        }
+      } catch (err) {
+        msgBox.textContent = 'Tilkoblingsfeil: ' + err.message;
+        msgBox.className = 'status-msg err';
+        msgBox.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Oppdater adgangskode';
+      }
+    }
+
     async function saveWeeklyFocus() {
       const text = document.getElementById('weeklyFocusArea').value.trim();
       try {
-        const data = await sendAdminApi('set_focus', { text: text });
+        const data = await sendSecureApi('set_focus', { text: text });
         if (data.status === 'ok') {
-          document.getElementById('weeklyFocusSavedAt').textContent = 'Lagret akkurat nå!';
-          showToastMsg('Ukens fokus er lagret!');
+          showToastMsg('Ukens fokus lagret!');
+          document.getElementById('weeklyFocusSavedAt').textContent = 'Sist oppdatert: akkurat nå';
         } else {
           alert('Feil: ' + data.message);
         }
       } catch (e) {
-        alert('Kunne ikke lagre fokus: ' + e.message);
+        alert('Feil ved lagring: ' + e.message);
       }
     }
 
     async function archiveRule(ruleText) {
-      if (!confirm('Vil du arkivere denne regelen?')) return;
+      if (!confirm('Arkivere regelen: "' + ruleText + '"?')) return;
       try {
-        const data = await sendAdminApi('archive_learning', { rule: ruleText });
+        const data = await sendSecureApi('archive_learning', { rule: ruleText });
         if (data.status === 'ok') {
           showToastMsg('Regel arkivert!');
           refreshAdminState();
@@ -1012,7 +1209,7 @@
       const rule = document.getElementById('newRuleText').value.trim();
       if (!rule) { alert('Vennligst skriv inn en instruks.'); return; }
       try {
-        const data = await sendAdminApi('add_rule', { category: cat, rule: rule });
+        const data = await sendSecureApi('add_rule', { category: cat, rule: rule });
         if (data.status === 'ok') {
           document.getElementById('newRuleText').value = '';
           showToastMsg('Ny regel lagret i minnet!');
@@ -1027,7 +1224,7 @@
 
     async function toggleSource(srcName, makeActive) {
       try {
-        const data = await sendAdminApi('toggle_source', { source: srcName, active: makeActive });
+        const data = await sendSecureApi('toggle_source', { source: srcName, active: makeActive });
         if (data.status === 'ok') {
           showToastMsg('Kildestatus oppdatert!');
           refreshAdminState();
@@ -1041,7 +1238,7 @@
 
     async function toggleSub(email, makeActive) {
       try {
-        const data = await sendAdminApi('toggle_sub', { email: email, active: makeActive });
+        const data = await sendSecureApi('toggle_sub', { email: email, active: makeActive });
         if (data.status === 'ok') {
           showToastMsg('Abonnent oppdatert!');
           refreshAdminState();
@@ -1056,7 +1253,7 @@
     async function removeSub(email) {
       if (!confirm('Vil du fjerne ' + email + '?')) return;
       try {
-        const data = await sendAdminApi('remove_sub', { email: email });
+        const data = await sendSecureApi('remove_sub', { email: email });
         if (data.status === 'ok') {
           showToastMsg('Abonnent fjernet!');
           refreshAdminState();
@@ -1074,7 +1271,7 @@
       const last = document.getElementById('newSubLast').value.trim();
       if (!email) { alert('Mangler e-post.'); return; }
       try {
-        const data = await sendAdminApi('add_sub', { email: email, firstName: first, lastName: last, consented: true });
+        const data = await sendSecureApi('add_sub', { email: email, firstName: first, lastName: last, consented: true });
         if (data.status === 'ok') {
           document.getElementById('newSubEmail').value = '';
           showToastMsg('Abonnent lagt til i Google Regneark!');
@@ -1088,14 +1285,26 @@
     }
 
     async function refreshAdminState() {
-      if (!currentAdminPin) return;
+      if (!currentAuthPin) return;
       try {
-        const data = await sendAdminApi('state');
+        const data = await sendSecureApi('state');
         if (data.status === 'ok') {
           adminState = data.state;
           renderAdminDashboard();
         }
       } catch (e) {}
+    }
+
+    function togglePasswordVisibility(inputId, btn) {
+      const inp = document.getElementById(inputId);
+      if (!inp) return;
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        btn.textContent = '🙈';
+      } else {
+        inp.type = 'password';
+        btn.textContent = '👁️';
+      }
     }
 
     function escapeHtml(str) {
