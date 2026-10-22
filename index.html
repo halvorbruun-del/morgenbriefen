@@ -571,7 +571,7 @@
     }
 
     /* =========================================================================
-       REPORT CONTENT & READER STYLING (Morgenbriefen redaksjonell form)
+       REPORT CONTENT & READER STYLING (Standardisert for alle utgaver & arkiv)
        ========================================================================= */
     #reportContent {
       color: var(--text-main);
@@ -581,36 +581,199 @@
       word-break: break-word;
     }
 
+    /* Tving alle mb-wrapper og mb-container elementer (både nye og eldre arkivrapporter) til transparent pass-through */
+    #reportContent .mb-wrapper,
+    #reportContent .mb-container {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: transparent !important;
+      background-color: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
     #reportContent img {
+      width: 100% !important;
       max-width: 100% !important;
       height: auto !important;
-      border-radius: 8px;
+      max-height: 380px !important;
+      object-fit: cover !important;
+      border-radius: 8px !important;
+      display: block !important;
+      margin: 12px 0 6px 0 !important;
+      border: 0 !important;
     }
 
     #reportContent table {
+      width: 100% !important;
       max-width: 100% !important;
+      border-collapse: collapse !important;
     }
 
-    /* Standard lys modus justeringer for rapporten */
+    /* -------------------------------------------------------------------------
+       1. STANDARDFARGER FOR LYS MODUS (Gjelder dagens og alle historiske utgaver)
+       ------------------------------------------------------------------------- */
     [data-theme="light"] #reportContent,
     :root:not([data-theme="dark"]) #reportContent {
-      color: #1A202C;
+      color: #1A202C !important;
+      font-family: var(--font-reader) !important;
     }
 
-    /* MØRK MODUS: HØYKONTRAST & ELEGANT TYPOGRAFI */
+    [data-theme="light"] #reportContent h1,
+    :root:not([data-theme="dark"]) #reportContent h1 {
+      color: #14284B !important;
+      font-size: 26px !important;
+      font-weight: 800 !important;
+      line-height: 1.2 !important;
+      letter-spacing: -0.5px !important;
+      margin: 0 0 6px 0 !important;
+    }
+
+    /* Skillelinje under tittel for eldre arkivrapporter (h1 + p) */
+    [data-theme="light"] #reportContent h1 + p,
+    :root:not([data-theme="dark"]) #reportContent h1 + p {
+      color: #64748B !important;
+      font-size: 13.5px !important;
+      margin: 0 0 24px 0 !important;
+      padding-bottom: 12px !important;
+      border-bottom: 2px solid #14284B !important;
+    }
+
+    [data-theme="light"] #reportContent h2,
+    :root:not([data-theme="dark"]) #reportContent h2 {
+      color: #14284B !important;
+      font-size: 20px !important;
+      font-weight: 700 !important;
+      line-height: 1.3 !important;
+      border-bottom: 2px solid #14284B !important;
+      padding-bottom: 6px !important;
+      margin: 32px 0 16px 0 !important;
+    }
+
+    [data-theme="light"] #reportContent h3,
+    [data-theme="light"] #reportContent h4,
+    [data-theme="light"] #reportContent .mb-story-title,
+    :root:not([data-theme="dark"]) #reportContent h3,
+    :root:not([data-theme="dark"]) #reportContent h4,
+    :root:not([data-theme="dark"]) #reportContent .mb-story-title {
+      color: #14284B !important;
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      line-height: 1.35 !important;
+      margin: 14px 0 6px 0 !important;
+    }
+
+    [data-theme="light"] #reportContent p,
+    [data-theme="light"] #reportContent li,
+    [data-theme="light"] #reportContent td,
+    :root:not([data-theme="dark"]) #reportContent p,
+    :root:not([data-theme="dark"]) #reportContent li,
+    :root:not([data-theme="dark"]) #reportContent td {
+      color: #2D3748 !important;
+      font-size: 15px !important;
+      line-height: 1.6 !important;
+    }
+
+    [data-theme="light"] #reportContent b,
+    [data-theme="light"] #reportContent strong,
+    :root:not([data-theme="dark"]) #reportContent b,
+    :root:not([data-theme="dark"]) #reportContent strong {
+      color: #14284B !important;
+      font-weight: 700 !important;
+    }
+
+    /* Ingressboks (Dagens overblikk) for BÅDE nye (#F8FAFC) og eldre (#F2F5FA) arkivrapporter */
+    [data-theme="light"] #reportContent .mb-lead,
+    [data-theme="light"] #reportContent [style*="background-color: #F8FAFC"],
+    [data-theme="light"] #reportContent [style*="background-color:#F8FAFC"],
+    [data-theme="light"] #reportContent [style*="background-color: #f8fafc"],
+    [data-theme="light"] #reportContent [style*="background-color:#f8fafc"],
+    [data-theme="light"] #reportContent [style*="background-color: #F2F5FA"],
+    [data-theme="light"] #reportContent [style*="background-color:#F2F5FA"],
+    [data-theme="light"] #reportContent [style*="background-color: #f2f5fa"],
+    [data-theme="light"] #reportContent [style*="background-color:#f2f5fa"],
+    :root:not([data-theme="dark"]) #reportContent .mb-lead,
+    :root:not([data-theme="dark"]) #reportContent [style*="background-color: #F8FAFC"],
+    :root:not([data-theme="dark"]) #reportContent [style*="background-color:#F8FAFC"],
+    :root:not([data-theme="dark"]) #reportContent [style*="background-color: #f8fafc"],
+    :root:not([data-theme="dark"]) #reportContent [style*="background-color:#f8fafc"],
+    :root:not([data-theme="dark"]) #reportContent [style*="background-color: #F2F5FA"],
+    :root:not([data-theme="dark"]) #reportContent [style*="background-color:#F2F5FA"],
+    :root:not([data-theme="dark"]) #reportContent [style*="background-color: #f2f5fa"],
+    :root:not([data-theme="dark"]) #reportContent [style*="background-color:#f2f5fa"] {
+      background-color: #F8FAFC !important;
+      border: 1px solid #E2E8F0 !important;
+      border-left: 4px solid #14284B !important;
+      border-radius: 6px !important;
+      padding: 16px 18px !important;
+      margin: 0 0 26px 0 !important;
+      color: #1A202C !important;
+    }
+
+    [data-theme="light"] #reportContent .mb-sources,
+    [data-theme="light"] #reportContent [style*="color: #64748B"],
+    [data-theme="light"] #reportContent [style*="color:#64748B"],
+    [data-theme="light"] #reportContent [style*="color: #666666"],
+    [data-theme="light"] #reportContent [style*="color:#666666"],
+    [data-theme="light"] #reportContent [style*="color: #555555"],
+    [data-theme="light"] #reportContent [style*="color:#555555"],
+    :root:not([data-theme="dark"]) #reportContent .mb-sources,
+    :root:not([data-theme="dark"]) #reportContent [style*="color: #64748B"],
+    :root:not([data-theme="dark"]) #reportContent [style*="color:#64748B"],
+    :root:not([data-theme="dark"]) #reportContent [style*="color: #666666"],
+    :root:not([data-theme="dark"]) #reportContent [style*="color:#666666"],
+    :root:not([data-theme="dark"]) #reportContent [style*="color: #555555"],
+    :root:not([data-theme="dark"]) #reportContent [style*="color:#555555"] {
+      color: #64748B !important;
+      font-size: 12.5px !important;
+      line-height: 1.45 !important;
+    }
+
+    [data-theme="light"] #reportContent a,
+    :root:not([data-theme="dark"]) #reportContent a {
+      color: #0B5394 !important;
+      text-decoration: underline !important;
+    }
+
+    /* -------------------------------------------------------------------------
+       2. STANDARDFARGER FOR MØRK MODUS (Høykontrast & elegant nattleser)
+       ------------------------------------------------------------------------- */
     [data-theme="dark"] #reportContent {
       color: #E2E8F0 !important;
+      font-family: var(--font-reader) !important;
+      background: transparent !important;
     }
 
     /* Hovedoverskrift Morgenbriefen */
     [data-theme="dark"] #reportContent h1 {
       color: #FFFFFF !important;
+      font-size: 26px !important;
+      font-weight: 800 !important;
+      line-height: 1.2 !important;
+      letter-spacing: -0.5px !important;
+      margin: 0 0 6px 0 !important;
+    }
+
+    /* Skillelinje under tittel for eldre arkivrapporter (h1 + p) */
+    [data-theme="dark"] #reportContent h1 + p {
+      color: #94A3B8 !important;
+      font-size: 13.5px !important;
+      margin: 0 0 24px 0 !important;
+      padding-bottom: 12px !important;
+      border-bottom: 2px solid #3B82F6 !important;
     }
 
     /* Seksjonsoverskrifter (Hovedlinjer, Fra kategoriene, Å følge med på) */
     [data-theme="dark"] #reportContent h2 {
       color: #93C5FD !important;
+      font-size: 20px !important;
+      font-weight: 700 !important;
+      line-height: 1.3 !important;
       border-bottom: 2px solid #3B82F6 !important;
+      padding-bottom: 6px !important;
+      margin: 32px 0 16px 0 !important;
     }
 
     /* Saks- og korttitler */
@@ -620,6 +783,10 @@
     [data-theme="dark"] #reportContent [style*="color: #14284B"],
     [data-theme="dark"] #reportContent [style*="color:#14284B"] {
       color: #93C5FD !important;
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      line-height: 1.35 !important;
+      margin: 14px 0 6px 0 !important;
     }
 
     /* Avsnitt, lister og brødtekst */
@@ -628,12 +795,18 @@
     [data-theme="dark"] #reportContent td,
     [data-theme="dark"] #reportContent [style*="color: #1A202C"],
     [data-theme="dark"] #reportContent [style*="color:#1A202C"],
+    [data-theme="dark"] #reportContent [style*="color: #1a1a1a"],
+    [data-theme="dark"] #reportContent [style*="color:#1a1a1a"],
     [data-theme="dark"] #reportContent [style*="color: #2D3748"],
-    [data-theme="dark"] #reportContent [style*="color:#2D3748"] {
+    [data-theme="dark"] #reportContent [style*="color:#2D3748"],
+    [data-theme="dark"] #reportContent [style*="color: #444444"],
+    [data-theme="dark"] #reportContent [style*="color:#444444"] {
       color: #E2E8F0 !important;
+      font-size: 15px !important;
+      line-height: 1.6 !important;
     }
 
-    /* Uthevet tekst (f.eks. Vurdering:, Dekning i dag:) */
+    /* Uthevet tekst */
     [data-theme="dark"] #reportContent b,
     [data-theme="dark"] #reportContent strong {
       color: #FFFFFF !important;
@@ -655,6 +828,8 @@
     [data-theme="dark"] #reportContent [style*="color: #94A3B8"],
     [data-theme="dark"] #reportContent [style*="color:#94A3B8"] {
       color: #94A3B8 !important;
+      font-size: 12.5px !important;
+      line-height: 1.45 !important;
     }
 
     /* Lenker */
@@ -663,15 +838,23 @@
       text-decoration: underline !important;
     }
 
-    /* Ingressboks (Dagens overblikk) og modulære kort */
+    /* Ingressboks (Dagens overblikk) og modulære kort (dekker BÅDE #F8FAFC og eldre #F2F5FA) */
     [data-theme="dark"] #reportContent .mb-lead,
     [data-theme="dark"] #reportContent [style*="background-color: #F8FAFC"],
     [data-theme="dark"] #reportContent [style*="background-color:#F8FAFC"],
     [data-theme="dark"] #reportContent [style*="background-color: #f8fafc"],
-    [data-theme="dark"] #reportContent [style*="background-color:#f8fafc"] {
+    [data-theme="dark"] #reportContent [style*="background-color:#f8fafc"],
+    [data-theme="dark"] #reportContent [style*="background-color: #F2F5FA"],
+    [data-theme="dark"] #reportContent [style*="background-color:#F2F5FA"],
+    [data-theme="dark"] #reportContent [style*="background-color: #f2f5fa"],
+    [data-theme="dark"] #reportContent [style*="background-color:#f2f5fa"] {
       background-color: rgba(30, 41, 59, 0.75) !important;
       border: 1px solid #334155 !important;
       border-left: 4px solid #3B82F6 !important;
+      border-radius: 6px !important;
+      padding: 16px 18px !important;
+      margin: 0 0 26px 0 !important;
+      color: #E2E8F0 !important;
     }
 
     /* Kategori-merker */
@@ -682,6 +865,7 @@
       background-color: #1E293B !important;
       color: #93C5FD !important;
       border: 1px solid #334155 !important;
+      border-radius: 4px !important;
     }
 
     /* Horisontale skillelinjer */
@@ -1153,15 +1337,37 @@
 
       const container = document.getElementById('reportContent');
       let cleanHtml = report.html || '';
+
+      // 1. Ekstraher innhold fra <body> hvis hele e-postdokumentet er overført (f.eks. fra Disk-arkiv)
       const bodyMatch = cleanHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
       if (bodyMatch) {
         cleanHtml = bodyMatch[1];
       }
-      // Fjern kun ytterste container-bakgrunner fra e-post malen slik at bokser og kort beholder sin form
+
+      // 2. Fjern mb-wrapper åpningstagg slik at den ikke påtvinger inline bakgrunn eller marger
+      cleanHtml = cleanHtml.replace(/<div\b[^>]*class="[^"]*mb-wrapper[^"]*"[^>]*>/gi, '');
+
+      // 3. Fjern e-postnettleser-topptekst hvis til stede ("Vises ikke e-posten riktig?")
+      cleanHtml = cleanHtml.replace(/<div[^>]*>\s*Vises ikke e-posten riktig\?[\s\S]*?<\/div>/gi, '');
+
+      // 4. Fjern e-postbunntekst og avmeldingsfelt hvis til stede
+      cleanHtml = cleanHtml.replace(/<div[^>]*class="[^"]*mb-footer[^"]*"[\s\S]*?<\/div>\s*<\/div>/gi, '');
+      cleanHtml = cleanHtml.replace(/<div[^>]*style="[^"]*font-size:\s*11px[^"]*"[\s\S]*?Meld deg av[\s\S]*?<\/div>/gi, '');
+
+      // 5. Nøytraliser hardkodede hvite bakgrunner og låste bredder fra inline-stiler så CSS-temaet styrer
+      cleanHtml = cleanHtml.replace(/style="([^"]*?)"/gi, (match, styleContent) => {
+        let updated = styleContent
+          .replace(/background(?:-color)?:\s*(?:#ffffff|#fff|white)\s*;?/gi, '')
+          .replace(/margin:\s*0\s+auto\s*;?/gi, 'margin: 0;')
+          .replace(/max-width:\s*640px\s*;?/gi, 'max-width: 100%;');
+        return 'style="' + updated.trim() + '"';
+      });
+
+      // 6. Fjern overflødige tabell- og cellebakgrunner fra e-post malen
       cleanHtml = cleanHtml.replace(/(<table[^>]*style="[^"]*?)background(?:-color)?:\s*#[a-fA-F0-9]+;?/gi, '$1');
       cleanHtml = cleanHtml.replace(/(<td[^>]*style="[^"]*?)background(?:-color)?:\s*#[a-fA-F0-9]+;?/gi, '$1');
 
-      // Sikre at alle Wikimedia Commons-bilder rutes til upload.wikimedia.org og har anonym referrerpolicy
+      // 7. Sikre at alle Wikimedia Commons-bilder rutes til upload.wikimedia.org og har anonym referrerpolicy
       cleanHtml = cleanHtml.replace(/https:\/\/thumb\.wikimedia\.org\//gi, 'https://upload.wikimedia.org/');
       cleanHtml = cleanHtml.replace(/<img\b([^>]*?)>/gi, (match, attrs) => {
         let updated = attrs;
