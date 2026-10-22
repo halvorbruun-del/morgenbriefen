@@ -647,15 +647,31 @@
   <div id="toast">Lenke kopiert til utklippstavlen!</div>
 
   <script>
-    const API_REPORTS_URL = 'https://script.google.com/macros/s/AKfycbwul6JKlHphAInK8aRglGSwuOi2WtxwQ6D9vExBYM25moAOop3cHEBto8yQOgvhzDTg/exec?api=reports';
-    const API_META_URL = 'https://script.google.com/macros/s/AKfycbwul6JKlHphAInK8aRglGSwuOi2WtxwQ6D9vExBYM25moAOop3cHEBto8yQOgvhzDTg/exec?api=meta';
-    const API_ADMIN_BASE = 'https://script.google.com/macros/s/AKfycbwul6JKlHphAInK8aRglGSwuOi2WtxwQ6D9vExBYM25moAOop3cHEBto8yQOgvhzDTg/exec?api=admin';
+    const API_EXEC_URL = 'https://script.google.com/macros/s/AKfycbwul6JKlHphAInK8aRglGSwuOi2WtxwQ6D9vExBYM25moAOop3cHEBto8yQOgvhzDTg/exec';
+    const API_REPORTS_URL = API_EXEC_URL + '?api=reports';
+    const API_META_URL = API_EXEC_URL + '?api=meta';
 
     let loadedReports = [];
     let currentReportIndex = 0;
     let baseFontSize = 16;
     let currentAdminPin = '';
     let adminState = null;
+
+    // Sikker overføring av administrative forespørsler via HTTP POST i body (aldri i URL)
+    async function sendAdminApi(action, extraData = {}) {
+      const payload = {
+        api: 'admin',
+        action: action,
+        pin: currentAdminPin,
+        ...extraData
+      };
+      const res = await fetch(API_EXEC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      return await res.json();
+    }
 
     async function initApp() {
       loadMeta();
@@ -762,7 +778,7 @@
     }
 
     // =========================================================================
-    // REDAKTØR & KOMMANDOSENTRAL LOGIKK
+    // REDAKTØR & KOMMANDOSENTRAL LOGIKK (100 % SIKRET MED POST & CRYPTO)
     // =========================================================================
     function checkSavedPin() {
       try {
@@ -788,7 +804,12 @@
       if (errBox) errBox.style.display = 'none';
 
       try {
-        const res = await fetch(API_ADMIN_BASE + '&pin=' + encodeURIComponent(pin) + '&action=state');
+        const payload = { api: 'admin', action: 'state', pin: pin };
+        const res = await fetch(API_EXEC_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
         const data = await res.json();
         if (data.status === 'ok') {
           currentAdminPin = pin;
@@ -924,7 +945,7 @@
     }
 
     // =========================================================================
-    // DE TRE TESTFUNKSJONENE
+    // DE TRE TESTFUNKSJONENE (SENDES TRYGT VIA HTTP POST BODY)
     // =========================================================================
     async function triggerTest(action, btn, originalText) {
       if (!currentAdminPin) {
@@ -939,8 +960,7 @@
       statusBox.className = 'status-msg info';
 
       try {
-        const res = await fetch(API_ADMIN_BASE + '&pin=' + encodeURIComponent(currentAdminPin) + '&action=' + encodeURIComponent(action));
-        const data = await res.json();
+        const data = await sendAdminApi(action);
         if (data.status === 'ok') {
           statusBox.textContent = '✅ ' + (data.message || 'Fullført med suksess!');
           statusBox.className = 'status-msg ok';
@@ -960,11 +980,12 @@
     async function saveWeeklyFocus() {
       const text = document.getElementById('weeklyFocusArea').value.trim();
       try {
-        const res = await fetch(API_ADMIN_BASE + '&pin=' + encodeURIComponent(currentAdminPin) + '&action=set_focus&text=' + encodeURIComponent(text));
-        const data = await res.json();
+        const data = await sendAdminApi('set_focus', { text: text });
         if (data.status === 'ok') {
           document.getElementById('weeklyFocusSavedAt').textContent = 'Lagret akkurat nå!';
           showToastMsg('Ukens fokus er lagret!');
+        } else {
+          alert('Feil: ' + data.message);
         }
       } catch (e) {
         alert('Kunne ikke lagre fokus: ' + e.message);
@@ -974,11 +995,12 @@
     async function archiveRule(ruleText) {
       if (!confirm('Vil du arkivere denne regelen?')) return;
       try {
-        const res = await fetch(API_ADMIN_BASE + '&pin=' + encodeURIComponent(currentAdminPin) + '&action=archive_learning&rule=' + encodeURIComponent(ruleText));
-        const data = await res.json();
+        const data = await sendAdminApi('archive_learning', { rule: ruleText });
         if (data.status === 'ok') {
           showToastMsg('Regel arkivert!');
           refreshAdminState();
+        } else {
+          alert('Feil: ' + data.message);
         }
       } catch (e) {
         alert('Feil ved arkivering: ' + e.message);
@@ -990,12 +1012,13 @@
       const rule = document.getElementById('newRuleText').value.trim();
       if (!rule) { alert('Vennligst skriv inn en instruks.'); return; }
       try {
-        const res = await fetch(API_ADMIN_BASE + '&pin=' + encodeURIComponent(currentAdminPin) + '&action=add_rule&category=' + encodeURIComponent(cat) + '&rule=' + encodeURIComponent(rule));
-        const data = await res.json();
+        const data = await sendAdminApi('add_rule', { category: cat, rule: rule });
         if (data.status === 'ok') {
           document.getElementById('newRuleText').value = '';
           showToastMsg('Ny regel lagret i minnet!');
           refreshAdminState();
+        } else {
+          alert('Feil: ' + data.message);
         }
       } catch (e) {
         alert('Feil ved lagring: ' + e.message);
@@ -1004,11 +1027,12 @@
 
     async function toggleSource(srcName, makeActive) {
       try {
-        const res = await fetch(API_ADMIN_BASE + '&pin=' + encodeURIComponent(currentAdminPin) + '&action=toggle_source&source=' + encodeURIComponent(srcName) + '&active=' + makeActive);
-        const data = await res.json();
+        const data = await sendAdminApi('toggle_source', { source: srcName, active: makeActive });
         if (data.status === 'ok') {
           showToastMsg('Kildestatus oppdatert!');
           refreshAdminState();
+        } else {
+          alert('Feil: ' + data.message);
         }
       } catch (e) {
         alert('Feil: ' + e.message);
@@ -1017,11 +1041,12 @@
 
     async function toggleSub(email, makeActive) {
       try {
-        const res = await fetch(API_ADMIN_BASE + '&pin=' + encodeURIComponent(currentAdminPin) + '&action=toggle_sub&email=' + encodeURIComponent(email) + '&active=' + makeActive);
-        const data = await res.json();
+        const data = await sendAdminApi('toggle_sub', { email: email, active: makeActive });
         if (data.status === 'ok') {
           showToastMsg('Abonnent oppdatert!');
           refreshAdminState();
+        } else {
+          alert('Feil: ' + data.message);
         }
       } catch (e) {
         alert('Feil: ' + e.message);
@@ -1031,11 +1056,12 @@
     async function removeSub(email) {
       if (!confirm('Vil du fjerne ' + email + '?')) return;
       try {
-        const res = await fetch(API_ADMIN_BASE + '&pin=' + encodeURIComponent(currentAdminPin) + '&action=remove_sub&email=' + encodeURIComponent(email));
-        const data = await res.json();
+        const data = await sendAdminApi('remove_sub', { email: email });
         if (data.status === 'ok') {
           showToastMsg('Abonnent fjernet!');
           refreshAdminState();
+        } else {
+          alert('Feil: ' + data.message);
         }
       } catch (e) {
         alert('Feil: ' + e.message);
@@ -1048,12 +1074,13 @@
       const last = document.getElementById('newSubLast').value.trim();
       if (!email) { alert('Mangler e-post.'); return; }
       try {
-        const res = await fetch(API_ADMIN_BASE + '&pin=' + encodeURIComponent(currentAdminPin) + '&action=add_sub&email=' + encodeURIComponent(email) + '&firstName=' + encodeURIComponent(first) + '&lastName=' + encodeURIComponent(last) + '&consented=true');
-        const data = await res.json();
+        const data = await sendAdminApi('add_sub', { email: email, firstName: first, lastName: last, consented: true });
         if (data.status === 'ok') {
           document.getElementById('newSubEmail').value = '';
           showToastMsg('Abonnent lagt til i Google Regneark!');
           refreshAdminState();
+        } else {
+          alert('Feil: ' + data.message);
         }
       } catch (e) {
         alert('Feil: ' + e.message);
@@ -1063,8 +1090,7 @@
     async function refreshAdminState() {
       if (!currentAdminPin) return;
       try {
-        const res = await fetch(API_ADMIN_BASE + '&pin=' + encodeURIComponent(currentAdminPin) + '&action=state');
-        const data = await res.json();
+        const data = await sendAdminApi('state');
         if (data.status === 'ok') {
           adminState = data.state;
           renderAdminDashboard();
