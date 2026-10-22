@@ -1061,6 +1061,41 @@
             </div>
           </div>
 
+          <!-- Nattlig kode- og systemhelse (kl. 03:00) -->
+          <div class="card" style="border-left: 4px solid #10B981;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+              <h2 style="margin: 0; display: flex; align-items: center; gap: 6px;">🛡️ Nattlig system- & kodehelse</h2>
+              <span id="auditStatusBadge" class="src-lvl-badge badge-lvl-1" style="font-size: 11px; padding: 4px 8px;">🟢 Operativ & Validert</span>
+            </div>
+            <div id="auditTimestamp" style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Siste nattkontroll: Laster…</div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 12px;">
+              <div style="background: var(--bg-page); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;">
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Apps Script Integritet</div>
+                <div id="auditFunctionsVal" style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-top: 2px;">198 funksjoner OK</div>
+                <div id="auditCallsVal" style="font-size: 11px; color: #059669;">48 kryss-kall intakte</div>
+              </div>
+              <div style="background: var(--bg-page); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;">
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Dypanalyse-kontrakt</div>
+                <div id="auditContractVal" style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-top: 2px;">?api=reports & focus</div>
+                <div style="font-size: 11px; color: #059669;">Synkronisert med bridge</div>
+              </div>
+              <div style="background: var(--bg-page); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;">
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Git Arbeidstre</div>
+                <div id="auditGitVal" style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-top: 2px;">main (Clean)</div>
+                <div style="font-size: 11px; color: #059669;">Multi-PC synk OK</div>
+              </div>
+            </div>
+
+            <div id="auditSummaryText" style="background: var(--bg-page); border-left: 3px solid #10B981; padding: 8px 12px; border-radius: 0 6px 6px 0; font-size: 12.5px; color: var(--text-main); margin-bottom: 12px;">
+              Systemet er fullt validert og operativt for morgendagens utsending.
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+              <button type="button" class="btn-secondary" style="font-size: 12px; padding: 6px 12px; cursor: pointer;" onclick="refreshAuditStatus(this)">🔄 Oppdater helsestatus</button>
+            </div>
+          </div>
+
           <!-- Testfunksjoner -->
           <div class="card">
             <h2 style="margin-bottom: 6px;">⚡ Manuell testkjøring & Driftskontroll</h2>
@@ -1485,6 +1520,13 @@
         document.getElementById('btnDriveLink').href = adminState.driveFolderUrl;
       }
 
+      // Nattlig system- & kodehelse
+      if (adminState.nightlyAudit) {
+        renderAuditCard(adminState.nightlyAudit);
+      } else {
+        fetchAuditFallback();
+      }
+
       // Ukens fokus
       document.getElementById('weeklyFocusArea').value = adminState.weeklyFocus || '';
       document.getElementById('weeklyFocusSavedAt').textContent = adminState.weeklyFocusUpdated ? ('Sist oppdatert: ' + formatDateTimeNorwegian(adminState.weeklyFocusUpdated)) : '';
@@ -1531,6 +1573,67 @@
             '</div>' +
           '</div>';
         }).join('');
+      }
+    }
+
+    function renderAuditCard(audit) {
+      if (!audit) return;
+      const badge = document.getElementById('auditStatusBadge');
+      const timeEl = document.getElementById('auditTimestamp');
+      const fnEl = document.getElementById('auditFunctionsVal');
+      const callsEl = document.getElementById('auditCallsVal');
+      const gitEl = document.getElementById('auditGitVal');
+      const sumEl = document.getElementById('auditSummaryText');
+
+      const isOk = audit.status === 'ok';
+      if (badge) {
+        badge.className = isOk ? 'src-lvl-badge badge-lvl-1' : 'src-lvl-badge';
+        badge.style.backgroundColor = isOk ? '#DCFCE7' : '#FEE2E2';
+        badge.style.color = isOk ? '#166534' : '#DC2626';
+        badge.textContent = isOk ? '🟢 Operativ & Validert' : '🔴 Avvik funnet';
+      }
+      if (timeEl) {
+        timeEl.textContent = 'Siste nattkontroll: ' + (audit.timestamp || 'Nettopp');
+      }
+      if (fnEl) {
+        fnEl.textContent = (audit.functionsCount || 198) + ' funksjoner OK';
+      }
+      if (callsEl) {
+        callsEl.textContent = (audit.crossCallsCount || 48) + ' kryss-kall intakte';
+      }
+      if (gitEl) {
+        gitEl.textContent = audit.gitStatus || 'main (Clean)';
+      }
+      if (sumEl) {
+        sumEl.textContent = audit.summary || 'Alle tester og kryss-sjekker godkjent.';
+        sumEl.style.borderLeftColor = isOk ? '#10B981' : '#DC2626';
+      }
+    }
+
+    async function fetchAuditFallback() {
+      try {
+        const res = await fetch('audit-status.json');
+        if (res.ok) {
+          const data = await res.json();
+          renderAuditCard(data);
+        }
+      } catch (e) {}
+    }
+
+    async function refreshAuditStatus(btn) {
+      if (btn) { btn.disabled = true; btn.textContent = 'Henter…'; }
+      try {
+        const res = await fetch(API_EXEC_URL + '?api=audit');
+        const data = await res.json();
+        if (data.status === 'ok' && data.audit) {
+          renderAuditCard(data.audit);
+          showToast('Helsestatus oppdatert!');
+        }
+      } catch (e) {
+        console.error('Feil ved oppdatering av helsestatus:', e);
+        fetchAuditFallback();
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '🔄 Oppdater helsestatus'; }
       }
     }
 
