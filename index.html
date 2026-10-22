@@ -512,6 +512,10 @@
     .badge-lvl-2 { background: #FEF3C7; color: #92400E; }
     .badge-lvl-3 { background: #F1F5F9; color: #475569; }
 
+    [data-theme="dark"] .badge-lvl-1 { background: rgba(22, 101, 52, 0.3); color: #86EFAC; border: 1px solid rgba(134, 239, 172, 0.3); }
+    [data-theme="dark"] .badge-lvl-2 { background: rgba(146, 64, 14, 0.3); color: #FDE68A; border: 1px solid rgba(253, 230, 138, 0.3); }
+    [data-theme="dark"] .badge-lvl-3 { background: rgba(71, 85, 105, 0.3); color: #CBD5E1; border: 1px solid rgba(203, 213, 225, 0.3); }
+
     .status-msg {
       padding: 10px 14px;
       border-radius: 6px;
@@ -522,6 +526,172 @@
 
     .status-msg.ok { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; }
     .status-msg.err { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
+
+    [data-theme="dark"] .status-msg.ok { background: rgba(6, 95, 70, 0.25); border-color: rgba(167, 243, 208, 0.3); color: #6EE7B7; }
+    [data-theme="dark"] .status-msg.err { background: rgba(153, 27, 27, 0.25); border-color: rgba(254, 202, 202, 0.3); color: #FCA5A5; }
+
+    /* Universell skjemastyling for mørk og lys modus */
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    textarea,
+    select {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: border-color 0.15s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+    }
+
+    .btn-secondary {
+      background: var(--bg-page);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-secondary:hover {
+      background: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--primary);
+    }
+
+    /* =========================================================================
+       REPORT CONTENT & READER STYLING (Morgenbriefen redaksjonell form)
+       ========================================================================= */
+    #reportContent {
+      color: var(--text-main);
+      font-family: var(--font-reader);
+      font-size: var(--font-size-base);
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    #reportContent img {
+      max-width: 100% !important;
+      height: auto !important;
+      border-radius: 8px;
+    }
+
+    #reportContent table {
+      max-width: 100% !important;
+    }
+
+    /* Standard lys modus justeringer for rapporten */
+    [data-theme="light"] #reportContent,
+    :root:not([data-theme="dark"]) #reportContent {
+      color: #1A202C;
+    }
+
+    /* MØRK MODUS: HØYKONTRAST & ELEGANT TYPOGRAFI */
+    [data-theme="dark"] #reportContent {
+      color: #E2E8F0 !important;
+    }
+
+    /* Hovedoverskrift Morgenbriefen */
+    [data-theme="dark"] #reportContent h1 {
+      color: #FFFFFF !important;
+    }
+
+    /* Seksjonsoverskrifter (Hovedlinjer, Fra kategoriene, Å følge med på) */
+    [data-theme="dark"] #reportContent h2 {
+      color: #93C5FD !important;
+      border-bottom: 2px solid #3B82F6 !important;
+    }
+
+    /* Saks- og korttitler */
+    [data-theme="dark"] #reportContent h3,
+    [data-theme="dark"] #reportContent h4,
+    [data-theme="dark"] #reportContent .mb-story-title,
+    [data-theme="dark"] #reportContent [style*="color: #14284B"],
+    [data-theme="dark"] #reportContent [style*="color:#14284B"] {
+      color: #93C5FD !important;
+    }
+
+    /* Avsnitt, lister og brødtekst */
+    [data-theme="dark"] #reportContent p,
+    [data-theme="dark"] #reportContent li,
+    [data-theme="dark"] #reportContent td,
+    [data-theme="dark"] #reportContent [style*="color: #1A202C"],
+    [data-theme="dark"] #reportContent [style*="color:#1A202C"],
+    [data-theme="dark"] #reportContent [style*="color: #2D3748"],
+    [data-theme="dark"] #reportContent [style*="color:#2D3748"] {
+      color: #E2E8F0 !important;
+    }
+
+    /* Uthevet tekst (f.eks. Vurdering:, Dekning i dag:) */
+    [data-theme="dark"] #reportContent b,
+    [data-theme="dark"] #reportContent strong {
+      color: #FFFFFF !important;
+    }
+
+    [data-theme="dark"] #reportContent p b,
+    [data-theme="dark"] #reportContent div b {
+      color: #93C5FD !important;
+    }
+
+    /* Byline, dato, kildehenvisninger og fotnoter */
+    [data-theme="dark"] #reportContent .mb-sources,
+    [data-theme="dark"] #reportContent [style*="color: #64748B"],
+    [data-theme="dark"] #reportContent [style*="color:#64748B"],
+    [data-theme="dark"] #reportContent [style*="color: #666666"],
+    [data-theme="dark"] #reportContent [style*="color:#666666"],
+    [data-theme="dark"] #reportContent [style*="color: #555555"],
+    [data-theme="dark"] #reportContent [style*="color:#555555"],
+    [data-theme="dark"] #reportContent [style*="color: #94A3B8"],
+    [data-theme="dark"] #reportContent [style*="color:#94A3B8"] {
+      color: #94A3B8 !important;
+    }
+
+    /* Lenker */
+    [data-theme="dark"] #reportContent a {
+      color: #60A5FA !important;
+      text-decoration: underline !important;
+    }
+
+    /* Ingressboks (Dagens overblikk) og modulære kort */
+    [data-theme="dark"] #reportContent .mb-lead,
+    [data-theme="dark"] #reportContent [style*="background-color: #F8FAFC"],
+    [data-theme="dark"] #reportContent [style*="background-color:#F8FAFC"],
+    [data-theme="dark"] #reportContent [style*="background-color: #f8fafc"],
+    [data-theme="dark"] #reportContent [style*="background-color:#f8fafc"] {
+      background-color: rgba(30, 41, 59, 0.75) !important;
+      border: 1px solid #334155 !important;
+      border-left: 4px solid #3B82F6 !important;
+    }
+
+    /* Kategori-merker */
+    [data-theme="dark"] #reportContent [style*="background-color: #E2E8F0"],
+    [data-theme="dark"] #reportContent [style*="background-color:#E2E8F0"],
+    [data-theme="dark"] #reportContent [style*="background-color: #e2e8f0"],
+    [data-theme="dark"] #reportContent [style*="background-color:#e2e8f0"] {
+      background-color: #1E293B !important;
+      color: #93C5FD !important;
+      border: 1px solid #334155 !important;
+    }
+
+    /* Horisontale skillelinjer */
+    [data-theme="dark"] #reportContent [style*="border-bottom: 2px solid #14284B"],
+    [data-theme="dark"] #reportContent [style*="border-bottom:2px solid #14284B"],
+    [data-theme="dark"] #reportContent [style*="border-top: 1px solid #E2E8F0"],
+    [data-theme="dark"] #reportContent [style*="border-top:1px solid #E2E8F0"],
+    [data-theme="dark"] #reportContent hr {
+      border-color: #334155 !important;
+    }
 
     /* Toast */
     #toast {
@@ -627,6 +797,7 @@
           <button type="button" id="tabAdmin" class="tab-btn" onclick="switchTab('admin')">🎛️ Kommandosentral & Test</button>
         </div>
         <div class="reader-controls" id="readerControls">
+          <button type="button" class="zoom-btn" onclick="toggleTheme()" title="Veksle mørk/lys modus" id="navThemeBtn">🌓 Mørk</button>
           <button type="button" class="zoom-btn" onclick="changeFontSize(-1)" title="Mindre skrift">A-</button>
           <button type="button" class="zoom-btn" onclick="changeFontSize(1)" title="Større skrift">A+</button>
         </div>
@@ -983,7 +1154,9 @@
       if (bodyMatch) {
         cleanHtml = bodyMatch[1];
       }
-      cleanHtml = cleanHtml.replace(/background-color:\s*#[a-fA-F0-9]+/gi, 'background-color: transparent');
+      // Fjern kun ytterste container-bakgrunner fra e-post malen slik at bokser og kort beholder sin form
+      cleanHtml = cleanHtml.replace(/(<table[^>]*style="[^"]*?)background(?:-color)?:\s*#[a-fA-F0-9]+;?/gi, '$1');
+      cleanHtml = cleanHtml.replace(/(<td[^>]*style="[^"]*?)background(?:-color)?:\s*#[a-fA-F0-9]+;?/gi, '$1');
       container.innerHTML = cleanHtml;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -1057,7 +1230,7 @@
               '<span style="font-size:13.5px; font-weight:600; color:var(--text-main);">' + escapeHtml(r.rule) + '</span>' +
               '<div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">Kilde: ' + escapeHtml(r.source || 'KI') + ' · ' + escapeHtml(r.date || '') + '</div>' +
             '</div>' +
-            '<button type="button" onclick="archiveRule(\'' + escapeHtml(r.rule).replace(/'/g, "\\'") + '\')" style="background:#E2E8F0; border:none; border-radius:4px; padding:4px 8px; font-size:11.5px; cursor:pointer;">Arkiver</button>' +
+            '<button type="button" class="btn-secondary" onclick="archiveRule(\'' + escapeHtml(r.rule).replace(/'/g, "\\'") + '\')">Arkiver</button>' +
           '</div>';
         }).join('');
       }
@@ -1081,7 +1254,7 @@
               '<div style="font-size:11.5px; color:var(--text-muted);">' + escapeHtml(s.email) + '</div>' +
             '</div>' +
             '<div style="display:flex; gap:6px;">' +
-              '<button type="button" onclick="toggleSub(\'' + escapeHtml(s.email) + '\', ' + !isAct + ')" style="background:#E2E8F0; border:none; border-radius:4px; padding:4px 8px; font-size:11px; cursor:pointer;">' + (isAct ? 'Pause' : 'Aktiver') + '</button>' +
+              '<button type="button" class="btn-secondary" onclick="toggleSub(\'' + escapeHtml(s.email) + '\', ' + !isAct + ')">' + (isAct ? 'Pause' : 'Aktiver') + '</button>' +
               '<button type="button" onclick="removeSub(\'' + escapeHtml(s.email) + '\')" style="background:#FEE2E2; color:#DC2626; border:none; border-radius:4px; padding:4px 8px; font-size:11px; cursor:pointer;">Slett</button>' +
             '</div>' +
           '</div>';
@@ -1332,9 +1505,17 @@
     function toggleTheme() {
       const current = document.documentElement.getAttribute('data-theme');
       const target = (current === 'dark') ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', target);
-      document.getElementById('themeIcon').textContent = (target === 'dark') ? '☀️' : '🌓';
+      applyTheme(target);
       try { localStorage.setItem('mb_theme', target); } catch (e) {}
+    }
+
+    function applyTheme(target) {
+      document.documentElement.setAttribute('data-theme', target);
+      const isDark = (target === 'dark');
+      const iconEl = document.getElementById('themeIcon');
+      if (iconEl) iconEl.textContent = isDark ? '☀️' : '🌓';
+      const navBtn = document.getElementById('navThemeBtn');
+      if (navBtn) navBtn.textContent = isDark ? '☀️ Lys' : '🌓 Mørk';
     }
 
     function copyShareLink() {
@@ -1371,7 +1552,12 @@
     }
 
     try {
-      if (localStorage.getItem('mb_theme') === 'dark') toggleTheme();
+      const savedTheme = localStorage.getItem('mb_theme');
+      if (savedTheme === 'dark') {
+        applyTheme('dark');
+      } else {
+        applyTheme('light');
+      }
     } catch (e) {}
 
     initApp();
