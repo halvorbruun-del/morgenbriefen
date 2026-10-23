@@ -10,6 +10,9 @@
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
 
+  <!-- Leaflet.js CSS (Steg 3: Geopolitisk Situasjonskart) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+
   <style>
     :root {
       --bg-page: #F8FAFC;
@@ -26,6 +29,7 @@
       --warning: #D97706;
       --font-reader: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       --font-size-base: 16px;
+      --reader-zoom: 1;
       --container-max: 780px;
     }
 
@@ -530,6 +534,503 @@
     [data-theme="dark"] .status-msg.ok { background: rgba(6, 95, 70, 0.25); border-color: rgba(167, 243, 208, 0.3); color: #6EE7B7; }
     [data-theme="dark"] .status-msg.err { background: rgba(153, 27, 27, 0.25); border-color: rgba(254, 202, 202, 0.3); color: #FCA5A5; }
 
+    /* Sone-inndeling for Kommandosentralen */
+    .zone-divider {
+      display: flex;
+      align-items: center;
+      margin: 28px 0 14px 0;
+    }
+    .zone-badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+    }
+    .zone-editorial { background: #DBEAFE; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .zone-ops { background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; }
+    .zone-admin { background: #F1F5F9; color: #334155; border: 1px solid #CBD5E1; }
+
+    [data-theme="dark"] .zone-editorial { background: rgba(30, 64, 175, 0.3); color: #93C5FD; border-color: rgba(147, 197, 253, 0.3); }
+    [data-theme="dark"] .zone-ops { background: rgba(6, 95, 70, 0.3); color: #6EE7B7; border-color: rgba(110, 231, 183, 0.3); }
+    [data-theme="dark"] .zone-admin { background: rgba(51, 65, 85, 0.4); color: #CBD5E1; border-color: rgba(203, 213, 225, 0.3); }
+
+    /* Prosjekthistorikk-tidslinje */
+    .history-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      margin-left: 10px;
+      padding-left: 18px;
+      border-left: 2px solid var(--border-color);
+    }
+    .history-item {
+      position: relative;
+    }
+    .history-dot {
+      position: absolute;
+      left: -24px;
+      top: 6px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--bg-card);
+    }
+    .history-content {
+      background: var(--bg-page);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .history-date {
+      font-weight: 700;
+      font-size: 13.5px;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+    .history-list {
+      margin-left: 18px;
+      font-size: 12.5px;
+      color: var(--text-main);
+      line-height: 1.55;
+    }
+    .history-list li {
+      margin-bottom: 4px;
+    }
+
+    /* =========================================================================
+       AUDIO PLAYER (Steg 2: Audio-First Mini-Player)
+       ========================================================================= */
+    .audio-card {
+      padding: 16px 20px;
+      margin-bottom: 18px;
+      border-left: 4px solid var(--accent);
+      background: var(--bg-card);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      border-radius: 10px;
+    }
+
+    .audio-main-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .audio-play-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #FFFFFF;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .audio-play-btn:hover {
+      transform: scale(1.06);
+      background: var(--primary-hover);
+    }
+
+    .audio-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .audio-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .audio-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .audio-controls-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .audio-speed-btn {
+      background: var(--bg-page);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      border-radius: 6px;
+      padding: 5px 9px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.15s;
+    }
+
+    .audio-speed-btn:hover {
+      background: var(--border-color);
+    }
+
+    .audio-progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .audio-time {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      width: 32px;
+    }
+
+    .audio-progress-bar {
+      flex: 1;
+      height: 6px;
+      background: var(--bg-page);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .audio-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--primary);
+      border-radius: 3px;
+      transition: width 0.1s linear;
+    }
+
+    /* =========================================================================
+       GEOPOLITISK SITUASJONSKART (Steg 3: Leaflet.js Brennpunkter)
+       ========================================================================= */
+    .map-card {
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      border-left: 4px solid var(--accent);
+      background: var(--bg-card);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      border-radius: 10px;
+    }
+
+    .map-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .map-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .map-header-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .map-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .map-card-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .map-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hotspot-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(239, 68, 68, 0.12);
+      color: #DC2626;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    [data-theme="dark"] .hotspot-badge {
+      background: rgba(239, 68, 68, 0.22);
+      color: #F87171;
+      border-color: rgba(239, 68, 68, 0.45);
+    }
+
+    .hotspot-badge .badge-dot {
+      width: 7px;
+      height: 7px;
+      background: #DC2626;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse-dot 1.8s infinite ease-in-out;
+    }
+
+    [data-theme="dark"] .hotspot-badge .badge-dot {
+      background: #F87171;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    .map-toggle-btn {
+      background: var(--bg-page);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 4px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.15s ease;
+    }
+
+    .map-toggle-btn:hover {
+      background: var(--border-color);
+      color: var(--text-main);
+    }
+
+    /* Fast brennpunkt-boks over kartet (alle knapper synlige samtidig uten scrolling) */
+    .map-hotspots-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      background: var(--bg-page);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .hotspot-filter-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 4px 11px;
+      border-radius: 14px;
+      font-size: 11.5px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+
+    .hotspot-filter-chip:hover {
+      background: var(--border-color);
+      border-color: var(--primary);
+      color: var(--text-main);
+    }
+
+    .hotspot-filter-chip.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--primary);
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(11, 83, 148, 0.3);
+    }
+
+    #situationMap {
+      width: 100%;
+      height: 380px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      z-index: 5;
+      background: var(--bg-page);
+    }
+
+    /* Mørkt tema for kartkontroller */
+    [data-theme="dark"] .leaflet-control-zoom a {
+      background-color: var(--bg-card) !important;
+      color: var(--text-main) !important;
+      border-color: var(--border-color) !important;
+    }
+    [data-theme="dark"] .leaflet-control-attribution {
+      background: rgba(19, 26, 41, 0.75) !important;
+      color: var(--text-muted) !important;
+    }
+    [data-theme="dark"] .leaflet-control-attribution a {
+      color: var(--text-muted) !important;
+    }
+
+    /* Pulsende Leaflet markører */
+    .pulse-marker-active {
+      position: relative;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pulse-marker-active .core {
+      width: 12px;
+      height: 12px;
+      background: #EF4444;
+      border: 2px solid #FFFFFF;
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(239, 68, 68, 0.9);
+      z-index: 2;
+    }
+
+    .pulse-marker-active .ring {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border: 2px solid #EF4444;
+      border-radius: 50%;
+      animation: hotspot-radar 2s infinite ease-out;
+      opacity: 0.8;
+      z-index: 1;
+    }
+
+    @keyframes hotspot-radar {
+      0% { transform: scale(0.4); opacity: 1; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    .pulse-marker-monitor {
+      position: relative;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pulse-marker-monitor .core {
+      width: 9px;
+      height: 9px;
+      background: var(--primary);
+      border: 1.5px solid #FFFFFF;
+      border-radius: 50%;
+      opacity: 0.75;
+      box-shadow: 0 0 4px rgba(11, 83, 148, 0.5);
+    }
+
+    /* Leaflet popup tilpasning til Morgenbriefen-tema */
+    .leaflet-popup-content-wrapper {
+      background: var(--bg-card) !important;
+      color: var(--text-main) !important;
+      border: 1px solid var(--border-color) !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .leaflet-popup-tip {
+      background: var(--bg-card) !important;
+    }
+
+    .leaflet-popup-content {
+      margin: 12px 14px !important;
+      font-family: inherit !important;
+      font-size: 13px !important;
+      line-height: 1.45 !important;
+    }
+
+    .popup-hotspot-header {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    [data-theme="dark"] .popup-hotspot-header {
+      color: var(--primary-hover);
+    }
+
+    .popup-hotspot-text {
+      font-size: 12.5px;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .popup-story-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      line-height: 1.35;
+    }
+
+    .popup-extra-info {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-style: italic;
+    }
+
+    .story-scroll-target {
+      scroll-margin-top: 100px;
+    }
+
+    .popup-jump-btn {
+      display: inline-block;
+      background: var(--primary);
+      color: #FFFFFF !important;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s ease;
+    }
+
+    .popup-jump-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Utlysingsanimasjon når man hopper fra kart til rapport */
+    @keyframes story-flash-highlight {
+      0% { outline: 3px solid var(--accent); background-color: rgba(37, 99, 235, 0.25); }
+      50% { outline: 2px solid var(--accent); background-color: rgba(37, 99, 235, 0.12); }
+      100% { outline: 0px solid transparent; background-color: transparent; }
+    }
+
+    .story-target-highlight {
+      animation: story-flash-highlight 2.8s ease-out;
+      border-radius: 6px;
+    }
+
     /* Universell skjemastyling for mørk og lys modus */
     input[type="text"],
     input[type="password"],
@@ -576,10 +1077,31 @@
     #reportContent {
       color: var(--text-main);
       font-family: var(--font-reader);
-      font-size: var(--font-size-base);
+      font-size: calc(var(--font-size-base) * var(--reader-zoom, 1));
       line-height: 1.6;
       word-break: break-word;
+      transition: font-size 0.15s ease;
     }
+
+    /* Proporsjonale overstyringer for inline font-sizes fra e-postkoden */
+    #reportContent [style*="font-size: 11"],
+    #reportContent [style*="font-size:11"] { font-size: calc(11.5px * var(--reader-zoom, 1)) !important; }
+    #reportContent [style*="font-size: 12"],
+    #reportContent [style*="font-size:12"] { font-size: calc(12.5px * var(--reader-zoom, 1)) !important; }
+    #reportContent [style*="font-size: 13"],
+    #reportContent [style*="font-size:13"] { font-size: calc(13px * var(--reader-zoom, 1)) !important; }
+    #reportContent [style*="font-size: 14"],
+    #reportContent [style*="font-size:14"] { font-size: calc(14.5px * var(--reader-zoom, 1)) !important; }
+    #reportContent [style*="font-size: 15"],
+    #reportContent [style*="font-size:15"] { font-size: calc(15px * var(--reader-zoom, 1)) !important; }
+    #reportContent [style*="font-size: 16"],
+    #reportContent [style*="font-size:16"] { font-size: calc(16px * var(--reader-zoom, 1)) !important; }
+    #reportContent [style*="font-size: 18"],
+    #reportContent [style*="font-size:18"] { font-size: calc(18px * var(--reader-zoom, 1)) !important; }
+    #reportContent [style*="font-size: 20"],
+    #reportContent [style*="font-size:20"] { font-size: calc(20px * var(--reader-zoom, 1)) !important; }
+    #reportContent [style*="font-size: 26"],
+    #reportContent [style*="font-size:26"] { font-size: calc(26px * var(--reader-zoom, 1)) !important; }
 
     /* Tving alle mb-wrapper og mb-container elementer (både nye og eldre arkivrapporter) til transparent pass-through */
     #reportContent .mb-wrapper,
@@ -624,7 +1146,7 @@
     [data-theme="light"] #reportContent h1,
     :root:not([data-theme="dark"]) #reportContent h1 {
       color: #14284B !important;
-      font-size: 26px !important;
+      font-size: calc(26px * var(--reader-zoom, 1)) !important;
       font-weight: 800 !important;
       line-height: 1.2 !important;
       letter-spacing: -0.5px !important;
@@ -635,7 +1157,7 @@
     [data-theme="light"] #reportContent h1 + p,
     :root:not([data-theme="dark"]) #reportContent h1 + p {
       color: #64748B !important;
-      font-size: 13.5px !important;
+      font-size: calc(13.5px * var(--reader-zoom, 1)) !important;
       margin: 0 0 24px 0 !important;
       padding-bottom: 12px !important;
       border-bottom: 2px solid #14284B !important;
@@ -644,7 +1166,7 @@
     [data-theme="light"] #reportContent h2,
     :root:not([data-theme="dark"]) #reportContent h2 {
       color: #14284B !important;
-      font-size: 20px !important;
+      font-size: calc(20px * var(--reader-zoom, 1)) !important;
       font-weight: 700 !important;
       line-height: 1.3 !important;
       border-bottom: 2px solid #14284B !important;
@@ -659,7 +1181,7 @@
     :root:not([data-theme="dark"]) #reportContent h4,
     :root:not([data-theme="dark"]) #reportContent .mb-story-title {
       color: #14284B !important;
-      font-size: 18px !important;
+      font-size: calc(18px * var(--reader-zoom, 1)) !important;
       font-weight: 700 !important;
       line-height: 1.35 !important;
       margin: 14px 0 6px 0 !important;
@@ -672,7 +1194,7 @@
     :root:not([data-theme="dark"]) #reportContent li,
     :root:not([data-theme="dark"]) #reportContent td {
       color: #2D3748 !important;
-      font-size: 15px !important;
+      font-size: calc(15px * var(--reader-zoom, 1)) !important;
       line-height: 1.6 !important;
     }
 
@@ -727,7 +1249,7 @@
     :root:not([data-theme="dark"]) #reportContent [style*="color: #555555"],
     :root:not([data-theme="dark"]) #reportContent [style*="color:#555555"] {
       color: #64748B !important;
-      font-size: 12.5px !important;
+      font-size: calc(12.5px * var(--reader-zoom, 1)) !important;
       line-height: 1.45 !important;
     }
 
@@ -749,7 +1271,7 @@
     /* Hovedoverskrift Morgenbriefen */
     [data-theme="dark"] #reportContent h1 {
       color: #FFFFFF !important;
-      font-size: 26px !important;
+      font-size: calc(26px * var(--reader-zoom, 1)) !important;
       font-weight: 800 !important;
       line-height: 1.2 !important;
       letter-spacing: -0.5px !important;
@@ -759,7 +1281,7 @@
     /* Skillelinje under tittel for eldre arkivrapporter (h1 + p) */
     [data-theme="dark"] #reportContent h1 + p {
       color: #94A3B8 !important;
-      font-size: 13.5px !important;
+      font-size: calc(13.5px * var(--reader-zoom, 1)) !important;
       margin: 0 0 24px 0 !important;
       padding-bottom: 12px !important;
       border-bottom: 2px solid #3B82F6 !important;
@@ -768,7 +1290,7 @@
     /* Seksjonsoverskrifter (Hovedlinjer, Fra kategoriene, Å følge med på) */
     [data-theme="dark"] #reportContent h2 {
       color: #93C5FD !important;
-      font-size: 20px !important;
+      font-size: calc(20px * var(--reader-zoom, 1)) !important;
       font-weight: 700 !important;
       line-height: 1.3 !important;
       border-bottom: 2px solid #3B82F6 !important;
@@ -783,7 +1305,7 @@
     [data-theme="dark"] #reportContent [style*="color: #14284B"],
     [data-theme="dark"] #reportContent [style*="color:#14284B"] {
       color: #93C5FD !important;
-      font-size: 18px !important;
+      font-size: calc(18px * var(--reader-zoom, 1)) !important;
       font-weight: 700 !important;
       line-height: 1.35 !important;
       margin: 14px 0 6px 0 !important;
@@ -802,7 +1324,7 @@
     [data-theme="dark"] #reportContent [style*="color: #444444"],
     [data-theme="dark"] #reportContent [style*="color:#444444"] {
       color: #E2E8F0 !important;
-      font-size: 15px !important;
+      font-size: calc(15px * var(--reader-zoom, 1)) !important;
       line-height: 1.6 !important;
     }
 
@@ -828,7 +1350,7 @@
     [data-theme="dark"] #reportContent [style*="color: #94A3B8"],
     [data-theme="dark"] #reportContent [style*="color:#94A3B8"] {
       color: #94A3B8 !important;
-      font-size: 12.5px !important;
+      font-size: calc(12.5px * var(--reader-zoom, 1)) !important;
       line-height: 1.45 !important;
     }
 
@@ -961,8 +1483,8 @@
           <button type="button" class="btn-icon" onclick="copyShareLink()" title="Del lenke">
             <span>🔗</span> Del
           </button>
-          <button type="button" class="btn-icon" onclick="toggleTheme()" title="Veksle tema">
-            <span id="themeIcon">🌓</span>
+          <button type="button" class="btn-icon" onclick="toggleTheme()" title="Veksle mørk/lys modus">
+            <span id="themeIcon">🌓</span> <span id="themeLabel">Mørk</span>
           </button>
           <button type="button" class="btn-icon btn-lock" onclick="lockSystem()" title="Lås systemet nå">
             <span>🔒</span> Lås
@@ -977,13 +1499,12 @@
         <div class="tabs">
           <button type="button" id="tabReader" class="tab-btn active" onclick="switchTab('reader')">📖 Dagens brief</button>
           <button type="button" id="tabArchive" class="tab-btn" onclick="switchTab('archive')">🗂️ Arkiv (<span id="archiveCount">0</span>)</button>
-          <button type="button" id="tabStats" class="tab-btn" onclick="switchTab('stats')">📊 Status & Kilder</button>
-          <button type="button" id="tabAdmin" class="tab-btn" onclick="switchTab('admin')">🎛️ Kommandosentral & Test</button>
+          <button type="button" id="tabStats" class="tab-btn" onclick="switchTab('stats')">📡 Kilder & Dekning</button>
+          <button type="button" id="tabAdmin" class="tab-btn" onclick="switchTab('admin')">🎛️ Kommandosentral</button>
         </div>
         <div class="reader-controls" id="readerControls">
-          <button type="button" class="zoom-btn" onclick="toggleTheme()" title="Veksle mørk/lys modus" id="navThemeBtn">🌓 Mørk</button>
-          <button type="button" class="zoom-btn" onclick="changeFontSize(-1)" title="Mindre skrift">A-</button>
-          <button type="button" class="zoom-btn" onclick="changeFontSize(1)" title="Større skrift">A+</button>
+          <button type="button" id="btnFontMinus" class="zoom-btn" onclick="changeFontSize(-1)" title="Mindre skrift (A-)">A-</button>
+          <button type="button" id="btnFontPlus" class="zoom-btn" onclick="changeFontSize(1)" title="Større skrift (A+)">A+</button>
         </div>
       </div>
     </div>
@@ -1002,6 +1523,64 @@
 
       <!-- Seksjon 1: Leser (Dagens utgave) -->
       <section id="sectionReader">
+
+        <!-- Lydspiller (Steg 2: Audio-First) -->
+        <div id="audioPlayerCard" class="card audio-card">
+          <audio id="briefAudioPlayer" preload="none"></audio>
+          
+          <div class="audio-main-row">
+            <button type="button" id="btnAudioPlay" class="audio-play-btn" onclick="toggleAudioPlay()" title="Spill av morgenbrief">
+              <span id="audioPlayIcon">▶</span>
+            </button>
+            <div class="audio-info">
+              <div class="audio-title">🎧 Hør dagens morgenbrief (2 min)</div>
+              <div class="audio-sub" id="audioTrackStatus">Muntlig sammendrag · Google Cloud TTS (Neural2)</div>
+            </div>
+            <div class="audio-controls-right">
+              <button type="button" class="audio-speed-btn" id="btnAudioSpeed" onclick="cycleAudioSpeed()" title="Endre avspillingshastighet">1.0x</button>
+            </div>
+          </div>
+
+          <!-- Framdriftslinje -->
+          <div class="audio-progress-wrap">
+            <span id="audioCurrentTime" class="audio-time">0:00</span>
+            <div class="audio-progress-bar" id="audioProgressBar" onclick="seekAudio(event)">
+              <div class="audio-progress-fill" id="audioProgressFill"></div>
+            </div>
+            <span id="audioDuration" class="audio-time">2:15</span>
+          </div>
+
+        </div>
+
+        <!-- Situasjonskart (Steg 3: Geopolitiske Brennpunkter med Leaflet.js) -->
+        <div id="situationMapCard" class="card map-card">
+          <div class="map-card-header">
+            <div class="map-header-left">
+              <span class="map-header-icon">🗺️</span>
+              <div>
+                <div class="map-card-title">Geopolitisk Situasjonskart</div>
+                <div class="map-card-sub" id="mapStatusSubtitle">Nattens brennpunkter og observasjonspunkter</div>
+              </div>
+            </div>
+            <div class="map-header-actions">
+              <span class="hotspot-badge" id="hotspotCountBadge">
+                <span class="badge-dot"></span>
+                <span id="hotspotCountText">Laster brennpunkter...</span>
+              </span>
+              <button type="button" class="map-toggle-btn" id="btnToggleMap" onclick="toggleMapVisibility()" title="Minimer eller utvid kartet">
+                <span id="mapToggleIcon">▼</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="mapBody">
+            <!-- Én samlet kontrollinje: Globalt + dagens brennpunkter (genereres dynamisk) -->
+            <div class="map-hotspots-bar" id="mapHotspotsBar"></div>
+
+            <div id="situationMap"></div>
+          </div>
+        </div>
+
         <div class="card" id="reportContent">
           <!-- Rendres dynamisk fra backend etter autentisering -->
         </div>
@@ -1015,9 +1594,9 @@
         </div>
       </section>
 
-      <!-- Seksjon 3: Kildehelse & Status -->
+      <!-- Seksjon 3: Kilder & Epistemisk Dekning -->
       <section id="sectionStats" style="display: none;">
-        <h2 style="font-size: 18px; margin-bottom: 14px; color: var(--text-main);">Driftsstatus & Kildehelse</h2>
+        <h2 style="font-size: 18px; margin-bottom: 14px; color: var(--text-main);">📡 Kilder & Epistemisk Dekning</h2>
         
         <div class="stats-grid">
           <div class="stat-box">
@@ -1038,6 +1617,25 @@
           </div>
         </div>
 
+        <!-- Kildematrise og søk -->
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+            <h3 style="margin: 0; font-size: 16px;">Kildekorpus (<span id="adminSourceTotal">62</span> fagkilder)</h3>
+            <input type="text" id="srcSearchInput" oninput="filterSources()" placeholder="Søk i kilder..." style="padding: 7px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; width: 220px;">
+          </div>
+          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">
+            Morgenbriefens lukkede kildeunivers er gradert i tre epistemiske nivåer for streng kildekritikk og balansert vekting. Klikk på en kilde for å midlertidig pause eller aktivere den:
+          </p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+            <span class="src-lvl-badge badge-lvl-1">Nivå 1: Bærende fakta (Reuters, AP, Bloomberg)</span>
+            <span class="src-lvl-badge badge-lvl-2">Nivå 2: Fag & Analyse (RUSI, CSIS, Foreign Affairs)</span>
+            <span class="src-lvl-badge badge-lvl-3">Nivå 3: Partsinnlegg & Indikatorer</span>
+          </div>
+          <div id="sourcesContainer" class="src-grid">
+            <p style="color: var(--text-muted); font-size: 13px;">Laster kildematrise...</p>
+          </div>
+        </div>
+
         <div class="card" style="font-size: 13.5px; line-height: 1.6;">
           <h3 style="font-size: 15px; margin-bottom: 8px; color: var(--primary);">Systeminformasjon</h3>
           <p>• <b>KI-motor:</b> Google Gemini <code>gemini-3.8-flash</code> med utvidet resonnering (extended thinking).</p>
@@ -1047,21 +1645,71 @@
         </div>
       </section>
 
-      <!-- Seksjon 4: Kommandosentral & Test (Automatisk tilgjengelig når portalen er låst opp) -->
+      <!-- Seksjon 4: Kommandosentral (Automatisk tilgjengelig når portalen er låst opp) -->
       <section id="sectionAdmin" style="display: none;">
         
         <div id="adminDashboard">
           
-          <!-- Hurtiglenker -->
-          <div class="card" style="padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-            <div style="font-weight: 700; font-size: 15px; color: var(--text-main);">🎛️ Kommandosentralen er aktiv</div>
+          <!-- Topplinje for Kommandosentralen -->
+          <div class="card" style="padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; border-left: 4px solid var(--primary);">
+            <div>
+              <div style="font-weight: 700; font-size: 15px; color: var(--text-main);">🎛️ Kommandosentralen er aktiv</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Redaksjonell styring, driftsovervåking og sikkerhet</div>
+            </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
               <a id="btnSheetLink" href="#" target="_blank" class="btn-icon" style="background: var(--primary); color: #FFF;">📊 Google Regneark ↗</a>
               <a id="btnDriveLink" href="#" target="_blank" class="btn-icon" style="background: #334155; color: #FFF;">📁 Disk-arkiv ↗</a>
             </div>
           </div>
 
-          <!-- Nattlig kode- og systemhelse (kl. 03:00) -->
+          <!-- ===================================================================
+               SONE 1: REDAKSJONELL REGI (Innhold og prompting)
+               =================================================================== -->
+          <div class="zone-divider">
+            <span class="zone-badge zone-editorial">Sone 1 · Redaksjonell Regi</span>
+          </div>
+
+          <!-- Ukens fokus -->
+          <div class="card">
+            <h2 style="margin-bottom: 6px;">🎯 Ukens strategiske fokus</h2>
+            <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 12px;">
+              Styrer hvilke temaer Gemini og Dypanalyse skal prioritere denne uken.
+            </p>
+            <textarea id="weeklyFocusArea" rows="3" placeholder="F.eks.: Eskalering i Rødehavet og konsekvenser for europeiske forsyningskjeder..." style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; font-family: inherit; margin-bottom: 10px;"></textarea>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <button type="button" class="btn-primary" onclick="saveWeeklyFocus()">Lagre fokus</button>
+              <span id="weeklyFocusSavedAt" style="font-size: 12px; color: var(--text-muted);"></span>
+            </div>
+          </div>
+
+          <!-- Selvlæring & Prompt-minne -->
+          <div class="card">
+            <h2 style="margin-bottom: 6px;">🧠 Selvlæring & Prompt-minne</h2>
+            <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 14px;">
+              Akkrediterte redaksjonelle regler som Gemini automatisk har lært under evalueringene, eller som du har lagt til manuelt:
+            </p>
+            <div id="learningsList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+              <p style="color: var(--text-muted); font-size: 13px;">Henter regler...</p>
+            </div>
+
+            <div style="border-top: 1px solid var(--border-color); padding-top: 14px;">
+              <h4 style="font-size: 13.5px; margin-bottom: 8px;">Legg til ny redaktørregel manuelt:</h4>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <input type="text" id="newRuleCat" placeholder="Kategori (Kildekritikk, Språk...)" style="width: 160px; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
+                <input type="text" id="newRuleText" placeholder="Skriv konkret instruks til Gemini..." style="flex: 1; min-width: 200px; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
+                <button type="button" class="btn-primary" onclick="addNewRule()">Legg til regel</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===================================================================
+               SONE 2: DRIFT, OBSERVABILITY & HISTORIKK (SRE og kodehelse)
+               =================================================================== -->
+          <div class="zone-divider">
+            <span class="zone-badge zone-ops">Sone 2 · Drift, Observability & Historikk</span>
+          </div>
+
+          <!-- Nattlig kode- og systemhelse -->
           <div class="card" style="border-left: 4px solid #10B981;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
               <h2 style="margin: 0; display: flex; align-items: center; gap: 6px;">🛡️ Nattlig system- & kodehelse</h2>
@@ -1072,8 +1720,8 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 12px;">
               <div style="background: var(--bg-page); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;">
                 <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Apps Script Integritet</div>
-                <div id="auditFunctionsVal" style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-top: 2px;">198 funksjoner OK</div>
-                <div id="auditCallsVal" style="font-size: 11px; color: #059669;">48 kryss-kall intakte</div>
+                <div id="auditFunctionsVal" style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-top: 2px;">205 funksjoner OK</div>
+                <div id="auditCallsVal" style="font-size: 11px; color: #059669;">49 kryss-kall intakte</div>
               </div>
               <div style="background: var(--bg-page); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;">
                 <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Dypanalyse-kontrakt</div>
@@ -1096,7 +1744,7 @@
             </div>
           </div>
 
-          <!-- Testfunksjoner -->
+          <!-- Manuell testkjøring & Driftskontroll -->
           <div class="card">
             <h2 style="margin-bottom: 6px;">⚡ Manuell testkjøring & Driftskontroll</h2>
             <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 16px;">
@@ -1116,64 +1764,116 @@
             <div id="testStatusMsg" class="status-msg"></div>
           </div>
 
-          <!-- Sikkerhet & Passordendring -->
+          <!-- Drifts-telemetri & Kjøringsbudsjett -->
           <div class="card">
-            <h2 style="margin-bottom: 6px;">🔐 Sikkerhet & Endre adgangskode</h2>
-            <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 16px;">
-              Du kan når som helst endre adgangskoden til Morgenbriefen her. Koden oppdateres kryptert i Google-skyen.
-            </p>
-            <form onsubmit="handleChangePin(event)" style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <input type="password" id="newPinInput" placeholder="Ny adgangskode (minst 8 tegn)..." required style="flex: 1; min-width: 220px; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px;">
-              <button type="submit" id="changePinBtn" class="btn-primary">Oppdater adgangskode</button>
-            </form>
-            <div id="changePinMsg" class="status-msg"></div>
-          </div>
-
-          <!-- Ukens fokus -->
-          <div class="card">
-            <h2 style="margin-bottom: 6px;">🎯 Ukens strategiske fokus</h2>
-            <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 12px;">
-              Styrer hvilke temaer Gemini og Dypanalyse skal prioritere denne uken.
-            </p>
-            <textarea id="weeklyFocusArea" rows="3" placeholder="F.eks.: Eskalering i Rødehavet og konsekvenser for europeiske forsyningskjeder..." style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; font-family: inherit; margin-bottom: 10px;"></textarea>
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-              <button type="button" class="btn-primary" onclick="saveWeeklyFocus()">Lagre fokus</button>
-              <span id="weeklyFocusSavedAt" style="font-size: 12px; color: var(--text-muted);"></span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+              <h2 style="margin: 0;">📊 Kjørings-telemetri & Kvoter</h2>
+              <span class="src-lvl-badge badge-lvl-1" style="font-size: 11px;">Paid Tier · gemini-3.8-flash</span>
             </div>
-          </div>
-
-          <!-- Selvlæring & Prompt-minne -->
-          <div class="card">
-            <h2 style="margin-bottom: 6px;">🧠 Selvlæring & Prompt-minne</h2>
-            <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 14px;">
-              Regler som Gemini automatisk har lært under evalueringene, eller som du har lagt til manuelt:
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">
+              Måling av ressursforbruk og kjøretid mot Google Apps Script 360-sekunders grensen:
             </p>
-            <div id="learningsList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
-              <p style="color: var(--text-muted); font-size: 13px;">Henter regler...</p>
-            </div>
-
-            <div style="border-top: 1px solid var(--border-color); padding-top: 14px;">
-              <h4 style="font-size: 13.5px; margin-bottom: 8px;">Legg til ny redaktørregel manuelt:</h4>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <input type="text" id="newRuleCat" placeholder="Kategori (Kildekritikk, Språk...)" style="width: 160px; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
-                <input type="text" id="newRuleText" placeholder="Skriv konkret instruks til Gemini..." style="flex: 1; min-width: 200px; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
-                <button type="button" class="btn-primary" onclick="addNewRule()">Legg til regel</button>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
+              <div style="background: var(--bg-page); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;">
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Tidsbudsjett (Apps Script)</div>
+                <div style="font-size: 15px; font-weight: 700; color: #059669; margin-top: 2px;">~165 sek / 360 sek</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Maks kjøretid: 6 minutter</div>
+              </div>
+              <div style="background: var(--bg-page); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;">
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">KI Tokenforbruk</div>
+                <div style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-top: 2px;">~14 200 inn / 1 800 ut</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Inkl. extended thinking</div>
+              </div>
+              <div style="background: var(--bg-page); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;">
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Verifiseringssteg</div>
+                <div style="font-size: 15px; font-weight: 700; color: #059669; margin-top: 2px;">Aktivt (To-stegs)</div>
+                <div style="font-size: 11px; color: var(--text-muted);">11 kanoniske feilmønstre</div>
               </div>
             </div>
           </div>
 
-          <!-- Kildekontroll -->
+          <!-- Prosjekthistorikk & Endringslogg -->
           <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-              <h2>📡 Kildekontroll-matrise (<span id="adminSourceTotal">62</span>)</h2>
-              <input type="text" id="srcSearchInput" oninput="filterSources()" placeholder="Søk i kilder..." style="padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; width: 180px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+              <h2 style="margin: 0;">📜 Prosjekthistorikk & Endringslogg</h2>
+              <span class="src-lvl-badge badge-lvl-1" style="font-size: 11px;">Siste oppdatert: 23. okt</span>
             </div>
-            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">
-              Klikk på en kilde for å midlertidig deaktivere eller reaktivere den i neste innsamling.
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 14px;">
+              Kronologisk logg over arkitekturhopp, sikkerhetsherdinger og redaksjonelle forbedringer (fra <a href="file:///c:/Users/halvo/.gemini/antigravity/scratch/morgenrapport/HISTORIKK.md" style="color:var(--primary); font-weight:600;">HISTORIKK.md</a>):
             </p>
-            <div id="sourcesContainer" class="src-grid">
-              <p style="color: var(--text-muted); font-size: 13px;">Laster kildematrise...</p>
+            
+            <div class="history-timeline">
+
+              <div class="history-item">
+                <div class="history-dot" style="background:#059669;"></div>
+                <div class="history-content">
+                  <div class="history-date">23. oktober 2026 — Shift-Left AppSec, Valideringssteg & Presisjon</div>
+                  <ul class="history-list">
+                    <li><b>AppSec-sikring:</b> Fjerning av <code>eval()</code>, vern mot formelinjeksjon i Sheets (<code>sanitizeForSheet_</code>) og minimalisering av OAuth-scopes.</li>
+                    <li><b>To-stegs verifisering:</b> Skille mellom <i>direkte motsigelse</i> (omskriving til kildens styrkenivå) og <i>ubekreftet påstand</i> (beholdes urørt, merkes i redaktørmail).</li>
+                    <li><b>Deterministisk kildesjekk:</b> Kilde-ID-er og kildenavn kryssjekkes i ren kode mot artikkellisten uten KI-usikkerhet.</li>
+                    <li><b>Feilsikker miljøguard:</b> <code>getOrCreateSubscriberSheet_</code> kaster feil og utløser alarm hvis <code>ENVIRONMENT !== 'production'</code>.</li>
+                    <li><b>Tidssone & Terminologi:</b> Konsekvent <code>Europe/Oslo</code> med klokkeslett overalt. Strengt forbud mot graderte tjenestebegreper – Morgenbriefen er utelukkende en åpen analyse og et redaksjonelt overblikk.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="history-item">
+                <div class="history-dot" style="background:#2563EB;"></div>
+                <div class="history-content">
+                  <div class="history-date">22. oktober 2026 — Redaksjonell Ergonomi, Mobil Admin & 11 Feilmønstre</div>
+                  <ul class="history-list">
+                    <li><b>Layout & Typografi:</b> Sober modulær kortlayout (<code>#F8FAFC</code>) og redaksjonell prompt med 3 lesemoduser (10 sek, 1 min, 3 min).</li>
+                    <li><b>Sentinel Nattvakt (kl. 21:00):</b> Automatisk kontroll av API-kvoter, lagring og kildeoppetid.</li>
+                    <li><b>Mobil Kommandosentral:</b> Konstant-tids PIN-innlogging og 15-minutters utestengelse ved brute force.</li>
+                    <li><b>Testsuite:</b> Formell forankring av de 11 feilmønstrene og opprettelse av testsuite under <code>testcase/runde2/</code>.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="history-item">
+                <div class="history-dot" style="background:#6366F1;"></div>
+                <div class="history-content">
+                  <div class="history-date">21. oktober 2026 — Epistemisk Kildevekting (v2.2) & Dypanalyse-bro</div>
+                  <ul class="history-list">
+                    <li><b>Kildegradering:</b> Nivå 1 (Fakta: Reuters, AP), Nivå 2 (Analyse: RUSI, CSIS), Nivå 3 (Partsinnlegg/indikatorer).</li>
+                    <li><b>Dypanalyse-integrasjon:</b> API-endepunkt <code>?api=reports</code> og <code>?api=focus</code> for overføring til ukesrapporter.</li>
+                    <li><b>Veikart Morgenbriefen 3.0:</b> Etablering av Always Free-arkitektur for TTS-lyd, BigQuery og kartrom.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="history-item">
+                <div class="history-dot" style="background:#8B5CF6;"></div>
+                <div class="history-content">
+                  <div class="history-date">20. oktober 2026 — Selvlæring, Kildehelse & Diskarkiv</div>
+                  <ul class="history-list">
+                    <li><b>Selvlærende sløyfe:</b> <code>Evaluering.js</code> kl. 07:00 sammenligner dagsrapporten mot kildenes råtekst.</li>
+                    <li><b>Google Disk-arkiv:</b> Månedlige arkiver (<code>Arkiv/yyyy/MM-maaned/</code>) og automatisk opprydding.</li>
+                    <li><b>Kildehelse-radar:</b> Batchovervåking av de 62 RSS-kildene med responstider og feilkoder.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="history-item">
+                <div class="history-dot" style="background:#64748B;"></div>
+                <div class="history-content">
+                  <div class="history-date">19. oktober 2026 — Grunnstein, Innsamling & Fundament</div>
+                  <ul class="history-list">
+                    <li><b>Oppstart:</b> Google Apps Script + Gemini Flash med parallell innhenting via <code>UrlFetchApp.fetchAll()</code> fra 62 fagkilder.</li>
+                    <li><b>Distribusjon:</b> HTML-mal, avmeldingsfunksjon og flerspiller-synk mot GitHub.</li>
+                  </ul>
+                </div>
+              </div>
+
             </div>
+          </div>
+
+          <!-- ===================================================================
+               SONE 3: ADMIN, BRUKERE & SIKKERHET (CRM og passord)
+               =================================================================== -->
+          <div class="zone-divider">
+            <span class="zone-badge zone-admin">Sone 3 · Administrasjon & Sikkerhet</span>
           </div>
 
           <!-- Abonnenter -->
@@ -1194,6 +1894,19 @@
             </div>
           </div>
 
+          <!-- Sikkerhet & Passordendring -->
+          <div class="card">
+            <h2 style="margin-bottom: 6px;">🔐 Sikkerhet & Endre adgangskode</h2>
+            <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 16px;">
+              Du kan når som helst endre adgangskoden til Morgenbriefen her. Koden oppdateres kryptert i Google-skyen.
+            </p>
+            <form onsubmit="handleChangePin(event)" style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <input type="password" id="newPinInput" placeholder="Ny adgangskode (minst 8 tegn)..." required style="flex: 1; min-width: 220px; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px;">
+              <button type="submit" id="changePinBtn" class="btn-primary">Oppdater adgangskode</button>
+            </form>
+            <div id="changePinMsg" class="status-msg"></div>
+          </div>
+
         </div>
       </section>
 
@@ -1208,6 +1921,9 @@
   </div>
 
   <div id="toast">Lenke kopiert til utklippstavlen!</div>
+
+  <!-- Leaflet.js (Steg 3: Geopolitisk Situasjonskart) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <script>
     const API_EXEC_URL = 'https://script.google.com/macros/s/AKfycbwul6JKlHphAInK8aRglGSwuOi2WtxwQ6D9vExBYM25moAOop3cHEBto8yQOgvhzDTg/exec';
@@ -1353,6 +2069,9 @@
 
       document.getElementById('reportContent').innerHTML = '';
       document.getElementById('archiveContainer').innerHTML = '';
+      if (typeof mapMarkersLayer !== 'undefined' && mapMarkersLayer) {
+        try { mapMarkersLayer.clearLayers(); } catch (e) {}
+      }
       document.getElementById('appContainer').style.display = 'none';
       document.getElementById('masterLockScreen').style.display = 'flex';
       document.getElementById('masterPinInput').value = '';
@@ -1369,6 +2088,27 @@
 
       const dateStr = formatDateNorwegian(report.date);
       document.getElementById('bannerDate').textContent = dateStr;
+
+      // Tilbakestill eller koble lydspiller for denne rapporten
+      const audioEl = document.getElementById('briefAudioPlayer');
+      const icon = document.getElementById('audioPlayIcon');
+      if (audioEl) {
+        audioEl.pause();
+        if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+        }
+        isAudioPlaying = false;
+        if (icon) icon.textContent = '▶';
+        if (report.audioUrl) {
+          audioEl.src = report.audioUrl;
+        } else {
+          audioEl.removeAttribute('src');
+        }
+        const fill = document.getElementById('audioProgressFill');
+        if (fill) fill.style.width = '0%';
+        const curEl = document.getElementById('audioCurrentTime');
+        if (curEl) curEl.textContent = '0:00';
+      }
 
       const container = document.getElementById('reportContent');
       let cleanHtml = report.html || '';
@@ -1419,6 +2159,9 @@
       });
       container.innerHTML = cleanHtml;
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (typeof updateSituationMapHotspots === 'function') {
+        setTimeout(() => updateSituationMapHotspots(), 60);
+      }
     }
 
     let isArchiveLoading = false;
@@ -1503,6 +2246,10 @@
 
       if (tab === 'archive' && loadedReports.length <= 1) {
         loadFullArchive();
+      }
+
+      if (tab === 'reader' && typeof situationMap !== 'undefined' && situationMap) {
+        setTimeout(() => situationMap.invalidateSize(), 150);
       }
     }
 
@@ -1871,13 +2618,21 @@
         .replace(/'/g, '&#39;');
     }
 
+    const FONT_ZOOM_LEVELS = [0.85, 0.92, 1.0, 1.1, 1.22, 1.35, 1.5];
+    let currentZoomIndex = 2; // Standard 1.0 (100 %)
+
     function changeFontSize(delta) {
-      baseFontSize = Math.min(24, Math.max(13, baseFontSize + delta));
-      const content = document.getElementById('reportContent');
-      content.style.fontSize = baseFontSize + 'px';
-      content.querySelectorAll('p, div, li, span').forEach(el => {
-        if (!el.closest('h1, h2, h3, h4')) el.style.fontSize = baseFontSize + 'px';
-      });
+      currentZoomIndex = Math.min(FONT_ZOOM_LEVELS.length - 1, Math.max(0, currentZoomIndex + delta));
+      applyFontZoom(FONT_ZOOM_LEVELS[currentZoomIndex]);
+      try { localStorage.setItem('mb_font_zoom_idx', currentZoomIndex); } catch (e) {}
+    }
+
+    function applyFontZoom(zoom) {
+      document.documentElement.style.setProperty('--reader-zoom', zoom);
+      const btnMinus = document.getElementById('btnFontMinus');
+      const btnPlus = document.getElementById('btnFontPlus');
+      if (btnMinus) btnMinus.style.opacity = (currentZoomIndex === 0) ? '0.35' : '1';
+      if (btnPlus) btnPlus.style.opacity = (currentZoomIndex === FONT_ZOOM_LEVELS.length - 1) ? '0.35' : '1';
     }
 
     function toggleTheme() {
@@ -1892,8 +2647,11 @@
       const isDark = (target === 'dark');
       const iconEl = document.getElementById('themeIcon');
       if (iconEl) iconEl.textContent = isDark ? '☀️' : '🌓';
-      const navBtn = document.getElementById('navThemeBtn');
-      if (navBtn) navBtn.textContent = isDark ? '☀️ Lys' : '🌓 Mørk';
+      const labelEl = document.getElementById('themeLabel');
+      if (labelEl) labelEl.textContent = isDark ? 'Lys' : 'Mørk';
+      if (typeof updateMapTheme === 'function') {
+        updateMapTheme(isDark);
+      }
     }
 
     function copyShareLink() {
@@ -1974,6 +2732,568 @@
       return n.toFixed(2).replace('.', ',') + ' kr';
     }
 
+    // =========================================================================
+    // LYDSPILLER (Steg 2: Audio-First Mini-Player)
+    // =========================================================================
+    let currentAudioSpeedIdx = 0;
+    const AUDIO_SPEEDS = [1.0, 1.25, 1.5];
+    let isAudioPlaying = false;
+
+    function initAudioPlayer() {
+      const audio = document.getElementById('briefAudioPlayer');
+      if (!audio) return;
+
+      audio.addEventListener('timeupdate', () => {
+        const cur = audio.currentTime || 0;
+        const dur = audio.duration || 135;
+        const pct = Math.min(100, (cur / dur) * 100);
+        const fill = document.getElementById('audioProgressFill');
+        if (fill) fill.style.width = pct + '%';
+        const curEl = document.getElementById('audioCurrentTime');
+        if (curEl) curEl.textContent = formatAudioTime(cur);
+      });
+
+      audio.addEventListener('loadedmetadata', () => {
+        const durEl = document.getElementById('audioDuration');
+        if (durEl && !isNaN(audio.duration) && audio.duration > 0) {
+          durEl.textContent = formatAudioTime(audio.duration);
+        }
+      });
+
+      audio.addEventListener('ended', () => {
+        isAudioPlaying = false;
+        const icon = document.getElementById('audioPlayIcon');
+        if (icon) icon.textContent = '▶';
+        const fill = document.getElementById('audioProgressFill');
+        if (fill) fill.style.width = '0%';
+        const curEl = document.getElementById('audioCurrentTime');
+        if (curEl) curEl.textContent = '0:00';
+      });
+    }
+
+    function toggleAudioPlay() {
+      const audio = document.getElementById('briefAudioPlayer');
+      const icon = document.getElementById('audioPlayIcon');
+      if (!audio) return;
+
+      if (isAudioPlaying) {
+        if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+        }
+        audio.pause();
+        isAudioPlaying = false;
+        if (icon) icon.textContent = '▶';
+      } else {
+        if (audio.src && audio.src !== window.location.href && !audio.src.endsWith('#')) {
+          audio.play().then(() => {
+            isAudioPlaying = true;
+            if (icon) icon.textContent = '⏸';
+          }).catch(() => {
+            playSpeechSynthesisPreview();
+          });
+        } else {
+          playSpeechSynthesisPreview();
+        }
+      }
+    }
+
+    function playSpeechSynthesisPreview() {
+      const icon = document.getElementById('audioPlayIcon');
+      if ('speechSynthesis' in window) {
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+          isAudioPlaying = false;
+          if (icon) icon.textContent = '▶';
+          return;
+        }
+
+        const reportEl = document.getElementById('reportContent');
+        let textToRead = '';
+        if (reportEl) {
+          const lead = reportEl.querySelector('.mb-lead') || reportEl.querySelector('p');
+          textToRead = lead ? lead.innerText.trim() : reportEl.innerText.slice(0, 300);
+        }
+        if (!textToRead) {
+          textToRead = 'Her er et sammendrag av dagens morgenbrief fra Halvor Bruun.';
+        }
+
+        const utt = new SpeechSynthesisUtterance('Morgenbriefen lydutdrag. ' + textToRead);
+        utt.lang = 'nb-NO';
+        utt.rate = AUDIO_SPEEDS[currentAudioSpeedIdx];
+
+        utt.onstart = () => {
+          isAudioPlaying = true;
+          if (icon) icon.textContent = '⏸';
+          const status = document.getElementById('audioTrackStatus');
+          if (status) status.textContent = 'Spiller av oppsummering (Forhåndsvisning)';
+        };
+
+        utt.onend = () => {
+          isAudioPlaying = false;
+          if (icon) icon.textContent = '▶';
+          const fill = document.getElementById('audioProgressFill');
+          if (fill) fill.style.width = '0%';
+          const status = document.getElementById('audioTrackStatus');
+          if (status) status.textContent = 'Muntlig sammendrag · Google Cloud TTS (Neural2)';
+        };
+
+        window.speechSynthesis.speak(utt);
+      } else {
+        alert('Lydavspiller: Fullverdig MP3-strømming aktiveres når Google Cloud TTS-funksjonen er i drift.');
+      }
+    }
+
+    function cycleAudioSpeed() {
+      currentAudioSpeedIdx = (currentAudioSpeedIdx + 1) % AUDIO_SPEEDS.length;
+      const speed = AUDIO_SPEEDS[currentAudioSpeedIdx];
+      const audio = document.getElementById('briefAudioPlayer');
+      if (audio) audio.playbackRate = speed;
+      const btn = document.getElementById('btnAudioSpeed');
+      if (btn) btn.textContent = speed.toFixed(1) + 'x';
+    }
+
+    function seekAudio(e) {
+      const bar = document.getElementById('audioProgressBar');
+      const audio = document.getElementById('briefAudioPlayer');
+      if (!bar || !audio) return;
+      const rect = bar.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const pct = Math.max(0, Math.min(1, clickX / rect.width));
+      const dur = audio.duration || 135;
+      audio.currentTime = pct * dur;
+      const fill = document.getElementById('audioProgressFill');
+      if (fill) fill.style.width = (pct * 100) + '%';
+    }
+
+    function formatAudioTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return m + ':' + (s < 10 ? '0' : '') + s;
+    }
+
+    /* =========================================================================
+       STEG 3: GEOPOLITISK SITUASJONSKART (Leaflet.js & Brennpunkter)
+       ========================================================================= */
+    let situationMap = null;
+    let mapTileLayer = null;
+    let mapMarkersLayer = null;
+    let isMapCollapsed = false;
+
+    const GEOPOLITICAL_NODES = [
+      {
+        id: 'hormuz',
+        title: 'Hormuzstredet & Persiabukta',
+        region: 'mideast',
+        coords: [26.5667, 56.25],
+        keywords: ['hormuz', 'persiabukt', 'persiske gulf', 'omanbukt', 'saudi', 'aramco', 'iran', 'iransk', 'teheran', 'riyadh', 'tankskip', 'oljetransport', 'qatar']
+      },
+      {
+        id: 'rodehavet',
+        title: 'Bab-el-Mandeb & Rødehavet',
+        region: 'mideast',
+        coords: [12.8, 43.3],
+        keywords: ['bab-el-mandeb', 'rødehavet', 'jemen', 'houthi', 'adenbukt', 'suez']
+      },
+      {
+        id: 'levanten',
+        title: 'Midtøsten & Levanten',
+        region: 'mideast',
+        coords: [32.0, 35.3],
+        keywords: ['israel', 'gaza', 'libanon', 'beirut', 'hizbollah', 'syria', 'damaskus', 'tel aviv', 'vestbredden']
+      },
+      {
+        id: 'ukraina',
+        title: 'Ukraina & Svartehavet',
+        region: 'ukraine',
+        coords: [48.5, 33.5],
+        keywords: ['ukraina', 'ukrainske', 'kyiv', 'kiev', 'svartehavet', 'odesa', 'krym', 'donetsk', 'luhansk', 'kharkiv', 'dnipro', 'zaporizjzja', 'donbas']
+      },
+      {
+        id: 'suwalki',
+        title: 'Suwalki-korridoren & Baltikum',
+        region: 'ukraine',
+        coords: [54.3, 23.2],
+        keywords: ['suwalki', 'baltikum', 'litauen', 'latvia', 'estland', 'vilnius', 'riga', 'tallinn', 'kaliningrad', 'belarus', 'minsk']
+      },
+      {
+        id: 'taiwan',
+        title: 'Taiwanstredet & Sør-Kina-havet',
+        region: 'indopacific',
+        coords: [24.0, 120.5],
+        keywords: ['taiwan', 'taipei', 'taiwanstredet', 'kinahavet', 'sør-kina-havet', 'beijing', 'kina', 'kinas', 'kinesisk', 'kinesiske', 'filippinene', 'manila']
+      },
+      {
+        id: 'korea',
+        title: 'Koreahalvøya',
+        region: 'indopacific',
+        coords: [38.0, 127.0],
+        keywords: ['nord-korea', 'sør-korea', 'pyongyang', 'seoul', 'dmz', 'kim jong', 'rason']
+      },
+      {
+        id: 'nordomraaden',
+        title: 'Nordområdene & Barentshavet',
+        region: 'nordic',
+        coords: [71.5, 30.0],
+        keywords: ['barentshavet', 'nordområdene', 'arktis', 'arktisk', 'arktiske', 'svalbard', 'kola', 'nordflåten', 'finnmark', 'murmansk', 'tromsø', 'bodø', 'norskekysten', 'barents']
+      },
+      {
+        id: 'ostersjoen',
+        title: 'Østersjøen & Finskebukta',
+        region: 'nordic',
+        coords: [57.5, 20.0],
+        keywords: ['østersjøen', 'gotland', 'bornholm', 'finskebukta', 'helsinki', 'stockholm', 'kabelbrudd', 'underbannsinfrastruktur']
+      },
+      {
+        id: 'etiopia',
+        title: 'Afrikas Horn & Etiopia',
+        region: 'mideast',
+        coords: [9.5, 39.5],
+        keywords: ['etiopia', 'tigray', 'tplf', 'addis', 'somalia', 'sudan', 'khartoum', 'eritrea']
+      },
+      {
+        id: 'europa_vest',
+        title: 'Vest- og Sentral-Europa',
+        region: 'ukraine',
+        coords: [50.5, 8.5],
+        keywords: ['brussel', 'nato', 'eu-kommisjonen', 'tsjekkia', 'prag', 'berlin', 'paris', 'london', 'frankrike', 'tyskland', 'storbritannia', 'europeiske union', 'den europeiske union']
+      },
+      {
+        id: 'nord_amerika',
+        title: 'Nord-Amerika (Washington)',
+        region: 'global',
+        coords: [38.9, -77.0],
+        keywords: ['washington', 'pentagon', 'hvite hus', 'kongressen', 'biden', 'trump', 'usa', 'amerikansk', 'amerikanske', 'folkevalgte i usa']
+      }
+    ];
+
+    const REGION_PRESETS = {
+      global: { center: [30, 25], zoom: 2.3 },
+      ukraine: { center: [50, 31], zoom: 5 },
+      mideast: { center: [26, 45], zoom: 4.5 },
+      indopacific: { center: [22, 118], zoom: 4.5 },
+      nordic: { center: [65, 22], zoom: 4.5 }
+    };
+
+    function initSituationMap() {
+      if (situationMap) return;
+      const mapEl = document.getElementById('situationMap');
+      if (!mapEl || typeof L === 'undefined') return;
+
+      situationMap = L.map('situationMap', {
+        center: REGION_PRESETS.global.center,
+        zoom: REGION_PRESETS.global.zoom,
+        minZoom: 2,
+        maxZoom: 12,
+        scrollWheelZoom: false
+      });
+
+      // Minimalistisk Esri Canvas: Viser kun rene landegrenser og havflater – null småbyer eller støy
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const tileUrl = isDark
+        ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+        : 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+
+      mapTileLayer = L.tileLayer(tileUrl, {
+        maxZoom: 16,
+        attribution: '&copy; <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a> &mdash; Canvas'
+      }).addTo(situationMap);
+
+      mapMarkersLayer = L.layerGroup().addTo(situationMap);
+
+      try {
+        if (localStorage.getItem('mb_map_collapsed') === 'true') {
+          toggleMapVisibility(false);
+        }
+      } catch (e) {}
+    }
+
+    function updateMapTheme(isDark) {
+      if (mapTileLayer) {
+        const tileUrl = isDark
+          ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+          : 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+        mapTileLayer.setUrl(tileUrl);
+      }
+      if (situationMap) {
+        setTimeout(() => situationMap.invalidateSize(), 50);
+      }
+    }
+
+    // =========================================================================
+    // ARTIKKEL-PARSER: STORY-FIRST ENTITY LINKING (1-til-1 korrespondanse)
+    // =========================================================================
+    function parseReportArticles(container) {
+      if (!container) return [];
+      const articles = [];
+      let articleIdx = 0;
+
+      // 1. Ekstraher Hovedlinjer (.mb-story-title)
+      const mainTitles = container.querySelectorAll('.mb-story-title');
+      mainTitles.forEach(titleEl => {
+        const titleText = titleEl.innerText.trim();
+        if (!titleText) return;
+
+        // Finn nærmeste artikkelskall (en div som inneholder denne saken og bildet, men ikke hele rapporten)
+        let storyBox = titleEl.closest('div');
+        if (!storyBox || storyBox === container || storyBox.classList.contains('mb-container')) {
+          storyBox = titleEl;
+        }
+
+        // Hent første brødtekstavsnitt rett etter tittelen
+        let bodyText = '';
+        let sib = titleEl.nextElementSibling;
+        while (sib) {
+          if (sib.tagName && sib.tagName.toLowerCase() === 'p' && !sib.classList.contains('mb-story-title')) {
+            bodyText = sib.innerText.trim();
+            break;
+          }
+          sib = sib.nextElementSibling;
+        }
+
+        const storyId = 'mb-story-' + (articleIdx++);
+        storyBox.id = storyId;
+        storyBox.classList.add('story-scroll-target');
+
+        articles.push({
+          id: storyId,
+          type: 'hovedlinje',
+          title: titleText,
+          body: bodyText,
+          element: storyBox
+        });
+      });
+
+      // 2. Ekstraher «Fra kategoriene» (bokser med border-left: 3px solid)
+      const catBoxes = container.querySelectorAll('div[style*="border-left"]');
+      catBoxes.forEach(box => {
+        // Unngå ingressboksen (.mb-lead)
+        if (box.classList.contains('mb-lead') || box.closest('.mb-lead')) return;
+
+        // Tittelen er første fete div inni boksen
+        const titleDiv = box.querySelector('div[style*="font-weight: 700"], div[style*="font-weight:700"]') || box.firstElementChild;
+        if (!titleDiv) return;
+
+        const titleText = titleDiv.innerText.trim();
+        if (!titleText || titleText.length > 220) return;
+
+        // Brødtekst er andre div inni boksen
+        let bodyText = '';
+        const innerDivs = box.querySelectorAll('div');
+        if (innerDivs.length >= 2) {
+          bodyText = innerDivs[1].innerText.trim();
+        } else {
+          bodyText = box.innerText.replace(titleText, '').trim();
+        }
+
+        const storyId = 'mb-story-' + (articleIdx++);
+        box.id = storyId;
+        box.classList.add('story-scroll-target');
+
+        articles.push({
+          id: storyId,
+          type: 'kategori',
+          title: titleText,
+          body: bodyText,
+          element: box
+        });
+      });
+
+      return articles;
+    }
+
+    function updateSituationMapHotspots() {
+      if (!situationMap) initSituationMap();
+      if (!situationMap || !mapMarkersLayer) return;
+
+      mapMarkersLayer.clearLayers();
+      const container = document.getElementById('reportContent');
+      const legendEl = document.getElementById('mapHotspotsLegend');
+      const badgeText = document.getElementById('hotspotCountText');
+
+      if (legendEl) legendEl.innerHTML = '';
+      if (!container) return;
+
+      // PARS ARTIKLER PÅ ARTIKKELNIVÅ (Story-First)
+      const articles = parseReportArticles(container);
+      const detectedNodes = [];
+
+      GEOPOLITICAL_NODES.forEach(node => {
+        const matchedArticles = [];
+
+        articles.forEach(art => {
+          const titleLower = art.title.toLowerCase();
+          const bodyLower = art.body.toLowerCase();
+          const fullLower = titleLower + ' ' + bodyLower;
+
+          // Høyeste vekt hvis stikkordet står i selve artikkeltittelen
+          const titleHit = node.keywords.some(kw => titleLower.includes(kw));
+          const bodyHit = node.keywords.some(kw => fullLower.includes(kw));
+
+          if (titleHit || bodyHit) {
+            matchedArticles.push({
+              article: art,
+              weight: titleHit ? 2 : 1
+            });
+          }
+        });
+
+        if (matchedArticles.length > 0) {
+          // Sorter treff med tittel-treff først
+          matchedArticles.sort((a, b) => b.weight - a.weight);
+          const primary = matchedArticles[0].article;
+
+          detectedNodes.push({
+            node: node,
+            primaryArticle: primary,
+            allArticles: matchedArticles.map(m => m.article)
+          });
+        }
+      });
+
+      if (badgeText) {
+        badgeText.textContent = detectedNodes.length + (detectedNodes.length === 1 ? ' aktivt brennpunkt' : ' aktive brennpunkter');
+      }
+
+      const activeBounds = [];
+
+      GEOPOLITICAL_NODES.forEach(node => {
+        const activeMatch = detectedNodes.find(d => d.node.id === node.id);
+
+        if (activeMatch) {
+          const art = activeMatch.primaryArticle;
+          const extraCount = activeMatch.allArticles.length - 1;
+
+          let snippetText = art.body;
+          if (snippetText.length > 120) {
+            snippetText = snippetText.substring(0, 120) + '…';
+          }
+
+          const pulseIcon = L.divIcon({
+            className: 'pulse-marker-active',
+            html: '<div class="ring"></div><div class="core"></div>',
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+          });
+
+          const popupHtml = `
+            <div class="popup-hotspot-header">🔴 ${node.title}</div>
+            <div class="popup-story-title">${escapeHtml(art.title)}</div>
+            <div class="popup-hotspot-text">${escapeHtml(snippetText)}</div>
+            ${extraCount > 0 ? `<div class="popup-extra-info">+ ${extraCount} relatert ${extraCount === 1 ? 'sak' : 'saker'}</div>` : ''}
+            <button type="button" class="popup-jump-btn" onclick="scrollToReportStory('${art.id}')">📖 Les analysen &darr;</button>
+          `;
+
+          const marker = L.marker(node.coords, { icon: pulseIcon }).addTo(mapMarkersLayer);
+          marker.bindPopup(popupHtml);
+          activeMatch.marker = marker;
+          activeBounds.push(node.coords);
+        } else {
+          const monitorIcon = L.divIcon({
+            className: 'pulse-marker-monitor',
+            html: '<div class="core"></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+          });
+
+          const popupHtml = `
+            <div class="popup-hotspot-header">🌐 ${node.title}</div>
+            <div class="popup-hotspot-text" style="color:var(--text-muted);font-size:12px;">Geopolitisk observasjonspunkt · Ingen akutte hendelser registrert i dagens utgave.</div>
+          `;
+
+          const marker = L.marker(node.coords, { icon: monitorIcon }).addTo(mapMarkersLayer);
+          marker.bindPopup(popupHtml);
+        }
+      });
+
+      // Populer én samlet, intuitiv stripe over kartet: [ 🌐 Hele verden ] + dagens aktive brennpunkter
+      const barEl = document.getElementById('mapHotspotsBar');
+      if (barEl) {
+        barEl.innerHTML = '';
+
+        const globalBtn = document.createElement('button');
+        globalBtn.type = 'button';
+        globalBtn.className = 'hotspot-filter-chip active';
+        globalBtn.innerHTML = '<span>🌐</span> Hele verden';
+        globalBtn.title = 'Vis hele verdenskartet';
+        globalBtn.onclick = () => {
+          document.querySelectorAll('.map-hotspots-bar .hotspot-filter-chip').forEach(c => c.classList.remove('active'));
+          globalBtn.classList.add('active');
+          if (activeBounds.length > 0) {
+            situationMap.fitBounds(activeBounds, { padding: [40, 40], maxZoom: 5 });
+          } else {
+            situationMap.setView(REGION_PRESETS.global.center, REGION_PRESETS.global.zoom);
+          }
+          situationMap.closePopup();
+        };
+        barEl.appendChild(globalBtn);
+
+        detectedNodes.forEach(item => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'hotspot-filter-chip';
+          chip.innerHTML = `<span>🔴</span> ${item.node.title}`;
+          chip.title = `${item.node.title}: ${item.primaryArticle.title}`;
+          chip.onclick = () => {
+            document.querySelectorAll('.map-hotspots-bar .hotspot-filter-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            situationMap.flyTo(item.node.coords, 6, { duration: 1.2 });
+            if (item.marker) {
+              item.marker.openPopup();
+            }
+          };
+          barEl.appendChild(chip);
+        });
+      }
+
+      if (activeBounds.length > 0 && situationMap) {
+        try {
+          if (activeBounds.length === 1) {
+            situationMap.setView(activeBounds[0], 5);
+          } else {
+            situationMap.fitBounds(activeBounds, { padding: [40, 40], maxZoom: 6 });
+          }
+        } catch (e) {}
+      }
+
+      setTimeout(() => {
+        if (situationMap) situationMap.invalidateSize();
+      }, 200);
+    }
+
+    function toggleMapVisibility(shouldSave = true) {
+      const body = document.getElementById('mapBody');
+      const icon = document.getElementById('mapToggleIcon');
+      const sub = document.getElementById('mapStatusSubtitle');
+      if (!body || !icon) return;
+
+      isMapCollapsed = (body.style.display !== 'none');
+      if (isMapCollapsed) {
+        body.style.display = 'none';
+        icon.textContent = '▶';
+        if (sub) sub.textContent = 'Kartet er minimert · Klikk for å utvide';
+      } else {
+        body.style.display = 'block';
+        icon.textContent = '▼';
+        if (sub) sub.textContent = 'Nattens brennpunkter og observasjonspunkter';
+        if (situationMap) {
+          setTimeout(() => situationMap.invalidateSize(), 150);
+        }
+      }
+
+      if (shouldSave) {
+        try { localStorage.setItem('mb_map_collapsed', isMapCollapsed); } catch (e) {}
+      }
+    }
+
+    function scrollToReportStory(elementId) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.classList.remove('story-target-highlight');
+      void el.offsetWidth;
+      el.classList.add('story-target-highlight');
+    }
+
     try {
       const savedTheme = localStorage.getItem('mb_theme');
       if (savedTheme === 'dark') {
@@ -1983,6 +3303,18 @@
       }
     } catch (e) {}
 
+    try {
+      const savedZoomIdx = localStorage.getItem('mb_font_zoom_idx');
+      if (savedZoomIdx !== null) {
+        const idx = parseInt(savedZoomIdx, 10);
+        if (!isNaN(idx) && idx >= 0 && idx < FONT_ZOOM_LEVELS.length) {
+          currentZoomIndex = idx;
+        }
+      }
+    } catch (e) {}
+    applyFontZoom(FONT_ZOOM_LEVELS[currentZoomIndex]);
+    initAudioPlayer();
+    initSituationMap();
     initApp();
   </script>
 </body>
