@@ -1665,6 +1665,9 @@
     }
 
     async function triggerTest(action, btn, originalText) {
+      if (action === 'test_brief') {
+        if (!confirm('Vil du starte en testkjøring av Morgenbriefen nå? Analysen av alle 62 kilder og Gemini-verifiseringen kjører asynkront i bakgrunnen og tar ca. 3–4 minutter.')) return;
+      }
       const msgBox = document.getElementById('testStatusMsg');
       btn.disabled = true;
       btn.textContent = '⏳ Utfører kjøring… Vennligst vent…';
