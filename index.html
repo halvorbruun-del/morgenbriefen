@@ -1799,7 +1799,7 @@
               <span class="src-lvl-badge badge-lvl-1" style="font-size: 11px;">Siste oppdatert: 23. okt</span>
             </div>
             <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 14px;">
-              Kronologisk logg over arkitekturhopp, sikkerhetsherdinger og redaksjonelle forbedringer (fra <a href="file:///c:/Users/halvo/.gemini/antigravity/scratch/morgenrapport/HISTORIKK.md" style="color:var(--primary); font-weight:600;">HISTORIKK.md</a>):
+              Kronologisk logg over arkitekturhopp, sikkerhetsherdinger og redaksjonelle forbedringer (fra <code style="color:var(--primary); font-weight:600;">HISTORIKK.md</code>):
             </p>
             
             <div class="history-timeline">
@@ -2157,6 +2157,16 @@
         }
         return '<img' + updated + '>';
       });
+      // 8. Sikkerhetssanering mot XSS i arkivert HTML:
+      // Fjern potensielt farlige tagger: <script>, <iframe>, <object>, <embed>
+      cleanHtml = cleanHtml.replace(/<(?:script|iframe|object|embed)[^>]*>[\s\S]*?<\/(?:script|iframe|object|embed)>/gi, '');
+      cleanHtml = cleanHtml.replace(/<(?:script|iframe|object|embed)[^>]*\/?>/gi, '');
+
+      // Fjern inline event-handlers on* (bortsett fra onerror på img)
+      cleanHtml = cleanHtml.replace(/\son(?!error\b)[a-zA-Z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+      // Fjern javascript: pseudo-protokoll i href/src
+      cleanHtml = cleanHtml.replace(/\b(?:href|src)\s*=\s*["']?\s*javascript:[^"'>\s]*/gi, 'href="#"');
+
       container.innerHTML = cleanHtml;
       window.scrollTo({ top: 0, behavior: 'smooth' });
       if (typeof updateSituationMapHotspots === 'function') {
@@ -2291,7 +2301,7 @@
               '<span style="font-size:13.5px; font-weight:600; color:var(--text-main);">' + escapeHtml(r.rule) + '</span>' +
               '<div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">Kilde: ' + escapeHtml(r.source || 'KI') + ' · ' + escapeHtml(formatDateTimeNorwegian(r.date, r.source)) + '</div>' +
             '</div>' +
-            '<button type="button" class="btn-secondary" onclick="archiveRule(\'' + escapeHtml(r.rule).replace(/'/g, "\\'") + '\')">Arkiver</button>' +
+            '<button type="button" class="btn-secondary" data-rule="' + escapeHtml(r.rule) + '" onclick="archiveRule(this.getAttribute(\'data-rule\'))">Arkiver</button>' +
           '</div>';
         }).join('');
       }
@@ -2315,8 +2325,8 @@
               '<div style="font-size:11.5px; color:var(--text-muted);">' + escapeHtml(s.email) + '</div>' +
             '</div>' +
             '<div style="display:flex; gap:6px;">' +
-              '<button type="button" class="btn-secondary" onclick="toggleSub(\'' + escapeHtml(s.email) + '\', ' + !isAct + ')">' + (isAct ? 'Pause' : 'Aktiver') + '</button>' +
-              '<button type="button" onclick="removeSub(\'' + escapeHtml(s.email) + '\')" style="background:#FEE2E2; color:#DC2626; border:none; border-radius:4px; padding:4px 8px; font-size:11px; cursor:pointer;">Slett</button>' +
+              '<button type="button" class="btn-secondary" data-email="' + escapeHtml(s.email) + '" data-active="' + (!isAct) + '" onclick="toggleSub(this.getAttribute(\'data-email\'), this.getAttribute(\'data-active\') === \'true\')">' + (isAct ? 'Pause' : 'Aktiver') + '</button>' +
+              '<button type="button" data-email="' + escapeHtml(s.email) + '" onclick="removeSub(this.getAttribute(\'data-email\'))" style="background:#FEE2E2; color:#DC2626; border:none; border-radius:4px; padding:4px 8px; font-size:11px; cursor:pointer;">Slett</button>' +
             '</div>' +
           '</div>';
         }).join('');
@@ -2401,7 +2411,7 @@
             '<span class="src-lvl-badge ' + lvlClass + '">N' + s.tier + '</span>' +
             '<span style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + escapeHtml(s.name) + '">' + escapeHtml(s.name) + '</span>' +
           '</div>' +
-          '<input type="checkbox" ' + (isAct ? 'checked' : '') + ' onchange="toggleSource(\'' + escapeHtml(s.name).replace(/'/g, "\\'") + '\', this.checked)">' +
+          '<input type="checkbox" ' + (isAct ? 'checked' : '') + ' data-source="' + escapeHtml(s.name) + '" onchange="toggleSource(this.getAttribute(\'data-source\'), this.checked)">' +
         '</div>';
       }).join('');
     }
