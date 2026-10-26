@@ -3190,7 +3190,7 @@
             <div class="popup-story-title">${escapeHtml(art.title)}</div>
             <div class="popup-hotspot-text">${escapeHtml(snippetText)}</div>
             ${extraCount > 0 ? `<div class="popup-extra-info">+ ${extraCount} relatert ${extraCount === 1 ? 'sak' : 'saker'}</div>` : ''}
-            <button type="button" class="popup-jump-btn" onclick="scrollToReportStory('${art.id}')">📖 Les analysen &darr;</button>
+            <button type="button" class="popup-jump-btn" data-article-id="${escapeHtml(String(art.id))}" onclick="scrollToReportStory(this.getAttribute('data-article-id'))">📖 Les analysen &darr;</button>
           `;
 
           const marker = L.marker(node.coords, { icon: pulseIcon }).addTo(mapMarkersLayer);
