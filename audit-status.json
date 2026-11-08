@@ -1,9 +1,9 @@
 {
-  "timestamp": "01. nov. 2026 kl. 03:02",
+  "timestamp": "08. nov. 2026 kl. 14:53",
   "status": "ok",
-  "summary": "345 funksjoner OK (115 krysskall) · API-kontrakt mot Dypanalyse intakt",
+  "summary": "228 funksjoner OK (55 krysskall) · API-kontrakt mot Dypanalyse intakt",
   "gitStatus": "main (Clean)",
-  "functionsCount": 345,
-  "crossCallsCount": 115,
+  "functionsCount": 228,
+  "crossCallsCount": 55,
   "details": "Automatisk validert av Code Sentinel."
 }

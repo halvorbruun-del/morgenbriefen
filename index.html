@@ -1796,13 +1796,114 @@
           <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
               <h2 style="margin: 0;">📜 Prosjekthistorikk & Endringslogg</h2>
-              <span class="src-lvl-badge badge-lvl-1" style="font-size: 11px;">Siste oppdatert: 23. okt</span>
+              <span class="src-lvl-badge badge-lvl-1" style="font-size: 11px;">Siste oppdatert: 8. nov</span>
             </div>
             <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 14px;">
               Kronologisk logg over arkitekturhopp, sikkerhetsherdinger og redaksjonelle forbedringer (fra <code style="color:var(--primary); font-weight:600;">HISTORIKK.md</code>):
             </p>
             
             <div class="history-timeline">
+
+              <div class="history-item">
+                <div class="history-dot" style="background:#059669;"></div>
+                <div class="history-content">
+                  <div class="history-date">8. november 2026 — OWASP LLM Sikkerhetsherding &amp; 0 Sårbarheter</div>
+                  <ul class="history-list">
+                    <li><b>LLM01 (Prompt Injection-vern):</b> Rådata omsluttes strengt av <code>=== START RÅDATA ===</code> og <code>=== SLUTT RÅDATA ===</code>. RSS-kilder behandles som rent passive data, og instruksjonsmarkører ignoreres deterministisk.</li>
+                    <li><b>LLM05 (Improper Output Handling):</b> Fail-closed validering av JSON-respons mot Gemini – ugyldig struktur avvises umiddelbart uten fallback til rå usikret modelltekst.</li>
+                    <li><b>LLM06 (PII-vern):</b> Fullstendig anonymisering av abonnentadresser i logger og telemetri.</li>
+                    <li><b>LLM07 (Data and Resource Exhaustion):</b> Hardt tak på maksimalt 150 000 tegn inn til Gemini API; beskytter mot token-bombeangrep og unødige API-kostnader.</li>
+                    <li><b>Code Sentinel Validering:</b> Full automatisert audit via <code>sjekk-sikkerhet.py</code> og <code>valider-koblinger.py</code>: 227 funksjoner OK, 54 kryss-kall intakte, 0 sårbarheter, og API-kontrakt mot Dypanalyse 100 % bekreftet.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="history-item">
+                <div class="history-dot" style="background:#D97706;"></div>
+                <div class="history-content">
+                  <div class="history-date">6.–7. november 2026 — Gullpakken i Skarp Drift &amp; 3-lags Idempotenslås</div>
+                  <ul class="history-list">
+                    <li><b>Gullpakken til LIVE (<code>bf22e3b</code>):</b> Spor 2 (ADR-010 Single Point of Escaping) og RSS Trinn 1–3 rullet ut til skarp produksjon via <code>push-gullpakke-til-live.ps1</code>.</li>
+                    <li><b>4 Kritiske Sikringer:</b> Automatisk Sentinel-audit før utsending, hardkodet beskyttelse mot 360s-timeout, vern mot START_TIME-nullstilling og auto-omstart via vaktpost.</li>
+                    <li><b>Tidsstyring &amp; 3-lags Idempotenslås (<code>9d75f4d</code>):</b> 6 optimaliseringer i tidsstyringen for <code>sendMorningBriefing</code> og 3-lags låsemekanisme i <code>Kode.js</code> som hindrer duplikate utsendinger ved overlappende triggere.</li>
+                    <li><b>Faste Regler for Norsk Syntaks (<code>0ca9d0a</code>):</b> Faste språk- og tegnsettingsregler i prompten og streng separasjon av oppgaver mot Google Regneark for å unngå samtidighetskollisjoner.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="history-item">
+                <div class="history-dot" style="background:#0284C7;"></div>
+                <div class="history-content">
+                  <div class="history-date">4.–5. november 2026 — Kjøretidsrevolusjon (183 s) &amp; Single Point of Escaping</div>
+                  <ul class="history-list">
+                    <li><b>Single Point of Escaping (ADR-010 / Spor 2):</b> Eliminerte synlige <code>&lt;p&gt;</code>-tagger. Pipeline med <code>decodeEntities_</code> -&gt; fjerning av formateringstagger (<code>HTML_TAG_STRIP_REGEX</code>) -&gt; deterministisk <code>escapeHtml_</code> nøyaktig én gang per tekstblokk.</li>
+                    <li><b>Bevaring av ulikhetstegn:</b> Matematiske ulikhetstegn (<code>a &lt; b og c &gt; d</code>) bevares trygt uten å forveksles med HTML.</li>
+                    <li><b>Fase 1B RSS-optimalisering (Trinn 1–3):</b> Datofiltrering før parsing, tak på 40 elementer per kilde, og linearisering av <code>cleanField_</code> som kuttet parsingtiden fra <b>326 sekunder til 183 sekunder</b> (44 % tidsbesparelse) – 360s-faren eliminert!</li>
+                    <li><b>Fiber på kontorhub:</b> Fiber installert på Halvors kontor for stabil drift av Acer Veriton N4670G.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="history-item">
+                <div class="history-dot" style="background:#475569;"></div>
+                <div class="history-content">
+                  <div class="history-date">3. november 2026 — Tretrinns Vaktmester &amp; Proaktiv Sentinel</div>
+                  <ul class="history-list">
+                    <li><b>Aktiv Selvreparasjon (ADR-009):</b> <code>runWatchdogCheck0620</code> sjekker sendemarkør og utfører automatisk nødutsending dersom 05:00-kjøringen har sviktet.</li>
+                    <li><b>Kritisk Driftsalarm:</b> <code>runWatchdogCheck0645</code> sender rød alarm til eier dersom nødutsendingen ikke førte frem innen kl. 06:45.</li>
+                    <li><b>Proaktiv Nattvakt:</b> <code>runSentinelHealthCheck</code> kl. 21:00 inspiserer kildehelse, kvoter og lagring kvelden før utsending.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="history-item">
+                <div class="history-dot" style="background:#7C3AED;"></div>
+                <div class="history-content">
+                  <div class="history-date">1. november 2026 — Målarkitektur 3.0 &amp; Kvotestyrt Modellfordeling</div>
+                  <ul class="history-list">
+                    <li><b>Målarkitektur 3.0 (ADR-007):</b> Overgang til modulær sky-orkestrert Python-pipeline (skarp driftsstart 10. november 2026). To-trinns AI-motor med Gemini 3.8 Flash (grovsortering) og Gemini 4 Argon (kildekritikk og 3 lesedybder).</li>
+                    <li><b>Hybrid Drift:</b> GitHub Actions i skyen (autopilot kl. 05:00) kombinert med Acer Veriton N4670G på fiber som lokal analysehub.</li>
+                    <li><b>Kvotestyrt Modellfordeling (ADR-008):</b> 90 % volum på Flash for rutinekoding og testing; 10 % kirurgi på Argon for arkitektur, Pydantic-skjemaer og kognitive prompter.</li>
+                    <li><b>Fremdriftsplan:</b> Utarbeidet <code>FREMDRIFTSPLAN_MALARKITEKTUR_3.0.md</code> og distribuert PDF-plan.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="history-item">
+                <div class="history-dot" style="background:#4F46E5;"></div>
+                <div class="history-content">
+                  <div class="history-date">31. oktober 2026 — Beredskap, Tilbakerulling &amp; Sikkerhetsnett</div>
+                  <ul class="history-list">
+                    <li><b>Systemarkitektur &amp; Beredskap:</b> Etablert <code>SYSTEM_ARKITEKTUR.md</code>, full beredskapsplan i <code>ROLLBACK.md</code> og automatiserte tilbakerullingsskript (<code>rull-tilbake-live.ps1</code> / <code>rull-tilbake-test.ps1</code>).</li>
+                    <li><b>Versjonskontroll:</b> Formalisert krav om eksplisitt redeployment (<code>clasp deploy -i &lt;DEPLOY_ID&gt;</code>) for å sikre at Web-appen speiler koden.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="history-item">
+                <div class="history-dot" style="background:#2563EB;"></div>
+                <div class="history-content">
+                  <div class="history-date">28.–30. oktober 2026 — Robust Avsnittshåndtering &amp; Felles Status-pipeline</div>
+                  <ul class="history-list">
+                    <li><b>Robust Avsnittshåndtering (ADR-004):</b> Innført <code>toParagraphHtml_</code> som parser doble linjeskift til <code>&lt;p&gt;</code>-tagger og bevarer matematiske ulikhetstegn (7/7 enhetstester godkjent).</li>
+                    <li><b>Felles Status-pipeline (ADR-005):</b> Automatisert generering av <code>STATUS_TIL_CLAUDE.md</code> via <code>generer-status-til-claude.py</code> for felles situasjonsforståelse på tvers av prosjektene.</li>
+                    <li><b>Strategisk Veikart (ADR-006):</b> Etablert tre-delt horisont i <code>ROADMAP.md</code> med deterministisk autopilot (Horisont 1–2) og Model Context Protocol (MCP) for interaktive dypdykk (Horisont 3).</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="history-item">
+                <div class="history-dot" style="background:#0D9488;"></div>
+                <div class="history-content">
+                  <div class="history-date">24.–27. oktober 2026 — Selvlærende Sløyfe v2.5, Grounding &amp; Sikkerhetsvakter</div>
+                  <ul class="history-list">
+                    <li><b>Læresløyfe v2.5:</b> Kill-switch (<code>AUTO_LEARN</code>), kvote på maks 1 aktiv regel per døgn, FIFO-tak på 8 regler, norsk morfologisk duplikatsjekk (40 % vs 60 % terskel) og <code>LockService</code>-beskyttelse.</li>
+                    <li><b>Prioritert Grounding:</b> Reelle kildeavvik først i søkekøen mot Google Search Grounding og påstandsdeduplisering.</li>
+                    <li><b>Miljøguard (v2.5.5):</b> <code>getSubscribers_()</code> blokkerer eksterne abonnenter automatisk dersom <code>ENVIRONMENT !== 'production'</code>; obligatorisk <code>[TEST]</code> i emnefelt.</li>
+                    <li><b>Kunnskapsstopp-vern &amp; Vintertid:</b> Vern mot forveksling av eldre historiske statsledere og overgang til vintertid (Europe/Oslo UTC+1).</li>
+                  </ul>
+                </div>
+              </div>
 
               <div class="history-item">
                 <div class="history-dot" style="background:#059669;"></div>
