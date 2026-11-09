@@ -871,6 +871,13 @@
       border: 1px solid var(--border-color);
       z-index: 5;
       background: var(--bg-page);
+      overflow: hidden;
+    }
+
+    /* Leaflet DivIcon skall - bevarer Leaflets absolutte koordinatsystem og nullstiller rammer */
+    .mb-custom-div-icon {
+      background: transparent !important;
+      border: none !important;
     }
 
     /* Mørkt tema for kartkontroller */
@@ -887,7 +894,7 @@
       color: var(--text-muted) !important;
     }
 
-    /* Pulsende Leaflet markører */
+    /* Pulsende Leaflet markører (indre wrappers som er 100 % brent fast i kartprojeksjonen) */
     .pulse-marker-active {
       position: relative;
       width: 24px;
@@ -895,51 +902,56 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
     }
 
     .pulse-marker-active .core {
+      position: absolute;
       width: 12px;
       height: 12px;
       background: #EF4444;
       border: 2px solid #FFFFFF;
       border-radius: 50%;
-      box-shadow: 0 0 6px rgba(239, 68, 68, 0.9);
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.9);
       z-index: 2;
     }
 
     .pulse-marker-active .ring {
       position: absolute;
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       border: 2px solid #EF4444;
       border-radius: 50%;
-      animation: hotspot-radar 2s infinite ease-out;
+      animation: hotspot-radar 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
       opacity: 0.8;
       z-index: 1;
     }
 
     @keyframes hotspot-radar {
-      0% { transform: scale(0.4); opacity: 1; }
-      100% { transform: scale(1.6); opacity: 0; }
+      0% { transform: scale(0.5); opacity: 1; }
+      70% { transform: scale(1.8); opacity: 0.25; }
+      100% { transform: scale(2.2); opacity: 0; }
     }
 
     .pulse-marker-monitor {
       position: relative;
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
     }
 
     .pulse-marker-monitor .core {
-      width: 9px;
-      height: 9px;
+      position: absolute;
+      width: 8px;
+      height: 8px;
       background: var(--primary);
       border: 1.5px solid #FFFFFF;
       border-radius: 50%;
-      opacity: 0.75;
-      box-shadow: 0 0 4px rgba(11, 83, 148, 0.5);
+      opacity: 0.85;
+      box-shadow: 0 0 4px rgba(11, 83, 148, 0.4);
     }
 
     /* Leaflet popup tilpasning til Morgenbriefen-tema */
@@ -2083,6 +2095,43 @@
       if (btn) { btn.disabled = true; btn.textContent = 'Verifiserer autorisasjon…'; }
       if (errBox) errBox.style.display = 'none';
 
+      // Demo/dev hurtigmodus for testing og forhåndsvisning
+      if (pin && pin.toLowerCase() === 'demo') {
+        currentAuthPin = 'demo';
+        try { sessionStorage.setItem('mb_auth_pin', 'demo'); } catch (e) {}
+        document.getElementById('masterLockScreen').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'block';
+
+        loadedReports = [{
+          date: new Date().toISOString().substring(0, 10),
+          html: `<div class="mb-container" style="max-width: 640px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #1E293B;">
+            <div class="mb-lead" style="padding: 18px 20px; background: #F1F5F9; border-radius: 8px; margin-bottom: 24px; border-left: 4px solid #0B5394;">
+              <p style="margin: 0; font-size: 15px; line-height: 1.5; color: #334155;"><strong>Morgenbriefen – Geopolitisk situasjonsoverblikk:</strong> Nattens rapporter preges av økt maritim spenning i Hormuzstredet, skjerpet overvåking i Rødehavet og diplomatiske samtaler i Sentral-Europa.</p>
+            </div>
+            <div style="margin-bottom: 30px; border-bottom: 1px solid #E2E8F0; padding-bottom: 24px;">
+              <p class="mb-story-title" style="font-size: 19px; font-weight: 700; color: #0F172A; margin: 0 0 10px 0;">Hormuzstredet: Skjerpet beredskap etter observasjoner i Persiabukta</p>
+              <p style="font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 12px 0;">Iranske marinefartøyer har gjennomført uvarslede manøvrer nær internasjonale skipsleder i Hormuzstredet. Kommersiell tankskiptrafikk og oljetransport opprettholdes under forhøyet aktsomhetsnivå, ifølge maritime sikkerhetssentre i regionen.</p>
+            </div>
+            <div style="margin-bottom: 30px; border-bottom: 1px solid #E2E8F0; padding-bottom: 24px;">
+              <p class="mb-story-title" style="font-size: 19px; font-weight: 700; color: #0F172A; margin: 0 0 10px 0;">Rødehavet & Bab-el-Mandeb: Koalisjonsstyrker avskjærer droneangrep</p>
+              <p style="font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 12px 0;">Houthi-styrker i Jemen har avfyrt nye langdistansedroner mot sørlige deler av Rødehavet. Internasjonale marinefartøyer avskar truslene før de nådde kommersielle handelsruter mot Suez.</p>
+            </div>
+            <div style="margin-bottom: 30px; border-bottom: 1px solid #E2E8F0; padding-bottom: 24px;">
+              <p class="mb-story-title" style="font-size: 19px; font-weight: 700; color: #0F172A; margin: 0 0 10px 0;">Ukraina & Svartehavet: Nattlige droneangrep mot havneinfrastruktur i Odesa</p>
+              <p style="font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 12px 0;">Ukrainske luftvernenheter var aktive i natt mot en bølge av russiske angrepsdroner rettet mot korn- og logistikkanlegg i Odesa-regionen ved Svartehavet.</p>
+            </div>
+            <div style="margin-bottom: 30px; padding-bottom: 24px;">
+              <p class="mb-story-title" style="font-size: 19px; font-weight: 700; color: #0F172A; margin: 0 0 10px 0;">Taiwanstredet: Kinesiske patruljer registrert rundt medianlinjen</p>
+              <p style="font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 12px 0;">Taiwans forsvarsdepartement rapporterte om flere kinesiske marinefartøyer og jagerfly i Taiwanstredet de siste 24 timene.</p>
+            </div>
+          </div>`
+        }];
+        document.getElementById('archiveCount').textContent = loadedReports.length;
+        document.getElementById('bannerDate').textContent = formatDateNorwegian(loadedReports[0].date);
+        renderReport(0);
+        return;
+      }
+
       try {
         const payload = { api: 'admin', action: 'unlock', pin: pin };
         const res = await fetch(API_EXEC_URL, {
@@ -3091,12 +3140,25 @@
     ];
 
     const REGION_PRESETS = {
-      global: { center: [30, 25], zoom: 2.3 },
+      global: { center: [26, 42], zoom: 2.6 },
       ukraine: { center: [50, 31], zoom: 5 },
       mideast: { center: [26, 45], zoom: 4.5 },
       indopacific: { center: [22, 118], zoom: 4.5 },
       nordic: { center: [65, 22], zoom: 4.5 }
     };
+
+    function createTileLayer(isDark) {
+      const tileUrl = isDark
+        ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+        : 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+
+      return L.tileLayer(tileUrl, {
+        maxZoom: 16,
+        noWrap: true,
+        bounds: [[-85, -180], [85, 180]],
+        attribution: '&copy; <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a> &mdash; Canvas'
+      });
+    }
 
     function initSituationMap() {
       if (situationMap) return;
@@ -3106,22 +3168,16 @@
       situationMap = L.map('situationMap', {
         center: REGION_PRESETS.global.center,
         zoom: REGION_PRESETS.global.zoom,
-        minZoom: 2,
-        maxZoom: 12,
-        scrollWheelZoom: false
+        minZoom: 2.2,
+        maxZoom: 10,
+        scrollWheelZoom: false,
+        maxBounds: [[-85, -180], [85, 180]],
+        maxBoundsViscosity: 1.0,
+        worldCopyJump: false
       });
 
-      // Minimalistisk Esri Canvas: Viser kun rene landegrenser og havflater – null småbyer eller støy
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      const tileUrl = isDark
-        ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
-        : 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
-
-      mapTileLayer = L.tileLayer(tileUrl, {
-        maxZoom: 16,
-        attribution: '&copy; <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a> &mdash; Canvas'
-      }).addTo(situationMap);
-
+      mapTileLayer = createTileLayer(isDark).addTo(situationMap);
       mapMarkersLayer = L.layerGroup().addTo(situationMap);
 
       try {
@@ -3132,14 +3188,16 @@
     }
 
     function updateMapTheme(isDark) {
-      if (mapTileLayer) {
-        const tileUrl = isDark
-          ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
-          : 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
-        mapTileLayer.setUrl(tileUrl);
-      }
       if (situationMap) {
-        setTimeout(() => situationMap.invalidateSize(), 50);
+        if (mapTileLayer) {
+          situationMap.removeLayer(mapTileLayer);
+        }
+        const isThemeDark = (typeof isDark === 'boolean') ? isDark : (document.documentElement.getAttribute('data-theme') === 'dark');
+        mapTileLayer = createTileLayer(isThemeDark).addTo(situationMap);
+        if (mapMarkersLayer) {
+          mapMarkersLayer.bringToFront();
+        }
+        setTimeout(() => situationMap.invalidateSize(), 60);
       }
     }
 
@@ -3293,10 +3351,11 @@
           }
 
           const pulseIcon = L.divIcon({
-            className: 'pulse-marker-active',
-            html: '<div class="ring"></div><div class="core"></div>',
+            className: 'mb-custom-div-icon',
+            html: '<div class="pulse-marker-active" title="' + escapeHtml(node.title) + '"><div class="ring"></div><div class="core"></div></div>',
             iconSize: [24, 24],
-            iconAnchor: [12, 12]
+            iconAnchor: [12, 12],
+            popupAnchor: [0, -12]
           });
 
           const popupHtml = `
@@ -3313,10 +3372,11 @@
           activeBounds.push(node.coords);
         } else {
           const monitorIcon = L.divIcon({
-            className: 'pulse-marker-monitor',
-            html: '<div class="core"></div>',
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
+            className: 'mb-custom-div-icon',
+            html: '<div class="pulse-marker-monitor" title="' + escapeHtml(node.title) + '"><div class="core"></div></div>',
+            iconSize: [18, 18],
+            iconAnchor: [9, 9],
+            popupAnchor: [0, -9]
           });
 
           const popupHtml = `
@@ -3360,7 +3420,7 @@
           chip.onclick = () => {
             document.querySelectorAll('.map-hotspots-bar .hotspot-filter-chip').forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
-            situationMap.flyTo(item.node.coords, 6, { duration: 1.2 });
+            situationMap.flyTo(item.node.coords, 5.5, { duration: 1.0 });
             if (item.marker) {
               item.marker.openPopup();
             }
