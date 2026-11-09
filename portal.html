@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="utf-8">
+  <title>Morgenbriefen – Utenriks- og sikkerhetspolitisk analyse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="description" content="Eksklusivt utenriks- og sikkerhetspolitisk overblikk for beslutningstakere.">
+  <meta name="theme-color" content="#0F172A">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
+
+  <!-- Leaflet.js CSS for situasjonskart -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+
+  <style>
+    :root {
+      --bg-page: #F8FAFC;
+      --bg-card: #FFFFFF;
+      --bg-header: #0F172A;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --border-color: #E2E8F0;
+      --primary: #0B5394;
+      --primary-hover: #083c6c;
+      --accent: #2563EB;
+      --danger: #DC2626;
+      --font-reader: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-size-base: 16px;
+      --container-max: 780px;
+    }
+
+    [data-theme="dark"] {
+      --bg-page: #090D16;
+      --bg-card: #131A29;
+      --bg-header: #070A10;
+      --text-main: #F1F5F9;
+      --text-muted: #94A3B8;
+      --border-color: #1E293B;
+      --primary: #3B82F6;
+      --primary-hover: #60A5FA;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: var(--font-reader);
+      font-size: var(--font-size-base);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* -------------------------------------------------------------------------
+       Airlock: Abonnent-innlogging
+       ------------------------------------------------------------------------- */
+    .portal-auth-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at 50% 25%, #1E293B 0%, #0F172A 70%, #070A10 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 9999;
+    }
+
+    .portal-auth-card {
+      background: rgba(30, 41, 59, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 38px 32px;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      color: #F8FAFC;
+    }
+
+    .portal-auth-logo {
+      font-size: 38px;
+      margin-bottom: 8px;
+    }
+
+    .portal-auth-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      color: #FFFFFF;
+    }
+
+    .portal-auth-sub {
+      font-size: 13px;
+      color: #94A3B8;
+      line-height: 1.4;
+      margin-bottom: 24px;
+    }
+
+    .input-wrap {
+      text-align: left;
+      margin-bottom: 16px;
+    }
+
+    .input-wrap label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #CBD5E1;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .portal-input {
+      width: 100%;
+      padding: 12px 14px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      color: #F8FAFC;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .portal-input:focus {
+      border-color: #38BDF8;
+      background: rgba(15, 23, 42, 0.85);
+    }
+
+    .btn-portal-primary {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+      transition: transform 0.1s ease, background 0.2s ease;
+    }
+
+    .btn-portal-primary:hover {
+      background: linear-gradient(135deg, #0369A1 0%, #075985 100%);
+      transform: translateY(-1px);
+    }
+
+    .auth-error-msg {
+      background: rgba(220, 38, 38, 0.2);
+      border: 1px solid rgba(220, 38, 38, 0.5);
+      color: #FCA5A5;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .auth-footer-help {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #64748B;
+      line-height: 1.5;
+    }
+
+    .auth-footer-help a {
+      color: #38BDF8;
+      text-decoration: none;
+    }
+
+    /* -------------------------------------------------------------------------
+       Portal App Container & Layout
+       ------------------------------------------------------------------------- */
+    .portal-app {
+      display: none;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    .top-header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .header-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-user-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(11, 83, 148, 0.08);
+      color: var(--primary);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    [data-theme="dark"] .header-user-badge {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60A5FA;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-main);
+      font-size: 14px;
+    }
+
+    .icon-btn:hover {
+      background: var(--border-color);
+    }
+
+    .portal-nav-tabs {
+      max-width: var(--container-max);
+      margin: 14px auto 0;
+      padding: 0 18px;
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .nav-tab {
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border: none;
+      background: transparent;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+    }
+
+    .nav-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .main-content {
+      max-width: var(--container-max);
+      margin: 20px auto 0;
+      padding: 0 18px;
+    }
+
+    /* -------------------------------------------------------------------------
+       Situasjonskart & Brennpunkter
+       ------------------------------------------------------------------------- */
+    .map-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .map-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .map-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .map-hotspots-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+
+    .hotspot-chip {
+      background: var(--bg-page);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-main);
+    }
+
+    .hotspot-chip.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--primary);
+    }
+
+    #situationMap {
+      width: 100%;
+      height: 380px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      background: var(--bg-page);
+    }
+
+    /* Leaflet DivIcon skall og faste markører */
+    .mb-custom-div-icon {
+      background: transparent !important;
+      border: none !important;
+    }
+
+    .pulse-marker-active {
+      position: relative;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .pulse-marker-active .core {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #EF4444;
+      border: 2px solid #FFFFFF;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.9);
+      z-index: 2;
+    }
+
+    .pulse-marker-active .ring {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border: 2px solid #EF4444;
+      border-radius: 50%;
+      animation: hotspot-radar 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+      opacity: 0.8;
+      z-index: 1;
+    }
+
+    @keyframes hotspot-radar {
+      0% { transform: scale(0.5); opacity: 1; }
+      70% { transform: scale(1.8); opacity: 0.25; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    .pulse-marker-monitor {
+      position: relative;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .pulse-marker-monitor .core {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border: 1.5px solid #FFFFFF;
+      border-radius: 50%;
+      opacity: 0.85;
+      box-shadow: 0 0 4px rgba(11, 83, 148, 0.4);
+    }
+
+    /* Leaflet Popup tilpasning */
+    .leaflet-popup-content-wrapper {
+      background: var(--bg-card) !important;
+      color: var(--text-main) !important;
+      border: 1px solid var(--border-color) !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+    }
+    .leaflet-popup-tip { background: var(--bg-card) !important; }
+    .leaflet-popup-content { margin: 12px 14px !important; font-family: inherit !important; font-size: 13px; }
+    .popup-hotspot-header { font-weight: 700; color: #EF4444; margin-bottom: 4px; }
+    .popup-story-title { font-weight: 600; margin-bottom: 6px; font-size: 14px; }
+    .popup-hotspot-text { color: var(--text-muted); line-height: 1.4; margin-bottom: 8px; }
+    .popup-jump-btn {
+      width: 100%;
+      padding: 6px 10px;
+      background: var(--primary);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* -------------------------------------------------------------------------
+       Rapport- og artikkelvisning
+       ------------------------------------------------------------------------- */
+    .report-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      margin-bottom: 30px;
+    }
+
+    .story-target-highlight {
+      animation: story-flash-highlight 2.8s ease-out;
+      border-radius: 6px;
+    }
+
+    @keyframes story-flash-highlight {
+      0% { outline: 3px solid var(--accent); background-color: rgba(37, 99, 235, 0.25); }
+      50% { outline: 2px solid var(--accent); background-color: rgba(37, 99, 235, 0.12); }
+      100% { outline: 0px solid transparent; background-color: transparent; }
+    }
+
+    /* Arkiv */
+    .archive-item {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .archive-item:hover { background: var(--bg-page); }
+    .archive-date { font-weight: 600; font-size: 14px; }
+    .archive-title { font-size: 13px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <!-- Airlock: Abonnent-innlogging -->
+  <div id="portalAuthOverlay" class="portal-auth-overlay">
+    <div class="portal-auth-card">
+      <div class="portal-auth-logo">🌐</div>
+      <div class="portal-auth-title">MORGENBRIEFEN</div>
+      <div class="portal-auth-sub">Utenriks- og sikkerhetspolitisk analyse for beslutningstakere</div>
+
+      <div id="authErrorMsg" class="auth-error-msg"></div>
+
+      <form id="authForm" onsubmit="handlePortalLogin(event)">
+        <div class="input-wrap">
+          <label for="subscriberEmail">Abonnent-epost</label>
+          <input type="email" id="subscriberEmail" class="portal-input" placeholder="navn@virksomhet.no" required autofocus>
+        </div>
+
+        <div class="input-wrap">
+          <label for="subscriberToken">Personlig adgangskode / Token (valgfritt)</label>
+          <input type="password" id="subscriberToken" class="portal-input" placeholder="Fylles automatisk fra morgen-epost">
+        </div>
+
+        <button type="submit" id="btnSubmitAuth" class="btn-portal-primary">Åpne Morgenbriefen</button>
+      </form>
+
+      <div class="auth-footer-help">
+        Leses av rådgivere og ledere i utenriks- og organisasjonsmiljøet.<br>
+        Har din virksomhet avtale? Tast inn din e-postadresse.<br>
+        <a href="mailto:halvor@morgenbriefen.no?subject=Forespørsel%20om%20virksomhetsavtale">Be om virksomhetsavtale for din organisasjon &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leserportalen -->
+  <div id="portalApp" class="portal-app">
+    <header class="top-header">
+      <div class="header-inner">
+        <div class="brand-title">
+          <span>🌐</span>
+          <span>Morgenbriefen</span>
+        </div>
+
+        <div id="userBadge" class="header-user-badge">
+          <span>👤</span>
+          <span id="userNameText">Laster...</span>
+        </div>
+
+        <div class="header-actions">
+          <button type="button" class="icon-btn" onclick="toggleTheme()" title="Lys/mørk modus">🌓</button>
+          <button type="button" class="icon-btn" onclick="zoomFont(-1)" title="Mindre tekst">A-</button>
+          <button type="button" class="icon-btn" onclick="zoomFont(1)" title="Større tekst">A+</button>
+          <button type="button" class="icon-btn" onclick="logoutSubscriber()" title="Logg ut">🚪</button>
+        </div>
+      </div>
+
+      <nav class="portal-nav-tabs">
+        <button type="button" id="tabToday" class="nav-tab active" onclick="switchPortalTab('today')">Dagens analyse</button>
+        <button type="button" id="tabArchive" class="nav-tab" onclick="switchPortalTab('archive')">Tidligere utgaver & Dypanalyse</button>
+      </nav>
+    </header>
+
+    <main class="main-content">
+      <!-- Seksjon 1: Dagens analyse -->
+      <section id="sectionToday">
+        <!-- Geopolitisk situasjonskart -->
+        <div class="map-card">
+          <div class="map-card-header">
+            <div class="map-card-title">
+              <span>🗺️</span>
+              <span>Geopolitisk Situasjonskart</span>
+            </div>
+            <span style="font-size: 12px; color: var(--text-muted);" id="hotspotCountSubtitle">Laster brennpunkter...</span>
+          </div>
+
+          <div class="map-hotspots-bar" id="mapHotspotsBar"></div>
+          <div id="situationMap"></div>
+        </div>
+
+        <!-- Dagsrapport container -->
+        <div class="report-card" id="reportContent">
+          <p style="text-align: center; color: var(--text-muted); padding: 40px 0;">Laster dagens analyse...</p>
+        </div>
+      </section>
+
+      <!-- Seksjon 2: Søkbart arkiv -->
+      <section id="sectionArchive" style="display: none;">
+        <div class="report-card">
+          <h2 style="font-size: 18px; margin-bottom: 12px;">Søk i historiske analyser</h2>
+          <input type="text" id="archiveSearchInput" class="portal-input" style="color: var(--text-main); margin-bottom: 16px;" placeholder="Søk etter stikkord (f.eks. Hormuz, Suwalki, sanksjoner)..." oninput="debounceSearchArchive()">
+          <div id="archiveListContainer">Laster arkiv...</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Leaflet.js -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <script>
+    const API_BASE = 'http://localhost:8000/api';
+    const FALLBACK_API_URL = 'https://script.google.com/macros/s/AKfycbwul6JKlHphAInK8aRglGSwuOi2WtxwQ6D9vExBYM25moAOop3cHEBto8yQOgvhzDTg/exec';
+
+    let currentSubscriber = null;
+    let situationMap = null;
+    let mapTileLayer = null;
+    let mapMarkersLayer = null;
+
+    const GEOPOLITICAL_NODES = [
+      { id: 'hormuz', title: 'Hormuzstredet & Persiabukta', coords: [26.5667, 56.25], keywords: ['hormuz', 'persiabukt', 'iran', 'tankskip', 'oljetransport'] },
+      { id: 'rodehavet', title: 'Bab-el-Mandeb & Rødehavet', coords: [12.8, 43.3], keywords: ['bab-el-mandeb', 'rødehavet', 'jemen', 'houthi', 'adenbukt', 'suez'] },
+      { id: 'levanten', title: 'Midtøsten & Levanten', coords: [32.0, 35.3], keywords: ['israel', 'gaza', 'libanon', 'hizbollah', 'syria'] },
+      { id: 'ukraina', title: 'Ukraina & Svartehavet', coords: [48.5, 33.5], keywords: ['ukraina', 'kyiv', 'svartehavet', 'odesa', 'krym', 'donetsk'] },
+      { id: 'suwalki', title: 'Suwalki-korridoren & Baltikum', coords: [54.3, 23.2], keywords: ['suwalki', 'baltikum', 'litauen', 'latvia', 'estland', 'kaliningrad'] },
+      { id: 'taiwan', title: 'Taiwanstredet & Sør-Kina-havet', coords: [24.0, 120.5], keywords: ['taiwan', 'taipei', 'taiwanstredet', 'kinahavet', 'sør-kina-havet', 'beijing', 'kina'] },
+      { id: 'nordomraaden', title: 'Nordområdene & Barentshavet', coords: [71.5, 30.0], keywords: ['barentshavet', 'nordområdene', 'arktis', 'svalbard', 'kola', 'nordflåten'] }
+    ];
+
+    // Initialisering ved sidelasting
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Sjekk URL-parametre for automatisk innlogging via personlig lenke
+      const params = new URLSearchParams(window.location.search);
+      const urlEmail = params.get('email');
+      const urlToken = params.get('token');
+
+      if (urlEmail) {
+        document.getElementById('subscriberEmail').value = urlEmail;
+        if (urlToken) document.getElementById('subscriberToken').value = urlToken;
+        await verifyAndLogin(urlEmail, urlToken, true);
+        return;
+      }
+
+      // 2. Sjekk eksisterende sesjon i sessionStorage
+      const savedUser = sessionStorage.getItem('mb_portal_user');
+      if (savedUser) {
+        try {
+          currentSubscriber = JSON.parse(savedUser);
+          launchPortal();
+          return;
+        } catch (e) {}
+      }
+
+      // Ikke innlogget: Vis innloggingsskjerm
+      document.getElementById('portalAuthOverlay').style.display = 'flex';
+    });
+
+    async function handlePortalLogin(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const email = document.getElementById('subscriberEmail').value.trim();
+      const token = document.getElementById('subscriberToken').value.trim();
+      await verifyAndLogin(email, token, false);
+    }
+
+    async function verifyAndLogin(email, token, isAuto) {
+      const errBox = document.getElementById('authErrorMsg');
+      const btn = document.getElementById('btnSubmitAuth');
+      if (btn) { btn.disabled = true; btn.textContent = 'Verifiserer tilgang…'; }
+      if (errBox) errBox.style.display = 'none';
+
+      // Utvikler-/demo-bypass
+      if (email.toLowerCase().includes('demo') || token === 'demo') {
+        currentSubscriber = {
+          email: email || 'demo@morgenbriefen.no',
+          name: 'Demo-abonnent (Utenriks)',
+          tier: 'b2b_organization',
+          organization: 'Utenriks- & Sikkerhetspolitisk Forum'
+        };
+        sessionStorage.setItem('mb_portal_user', JSON.stringify(currentSubscriber));
+        launchPortal();
+        return;
+      }
+
+      try {
+        // Prøv lokalt Python API først
+        const res = await fetch(`${API_BASE}/portal/auth`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, token: token || null })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          currentSubscriber = data;
+          sessionStorage.setItem('mb_portal_user', JSON.stringify(data));
+          // Rens URL for tokens
+          if (window.history.replaceState) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+          launchPortal();
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || 'Ingen aktiv tilgang funnet.');
+        }
+      } catch (err) {
+        // Fallback: Sjekk mot Apps Script hvis Python API ikke svarer
+        try {
+          const fbRes = await fetch(`${FALLBACK_API_URL}?api=reports&days=1`);
+          if (fbRes.ok) {
+            currentSubscriber = { email: email, name: email.split('@')[0], tier: 'trial' };
+            sessionStorage.setItem('mb_portal_user', JSON.stringify(currentSubscriber));
+            launchPortal();
+            return;
+          }
+        } catch (e) {}
+
+        if (errBox) {
+          errBox.textContent = err.message || 'Kunne ikke verifisere adgang.';
+          errBox.style.display = 'block';
+        }
+        if (btn) { btn.disabled = false; btn.textContent = 'Åpne Morgenbriefen'; }
+      }
+    }
+
+    function launchPortal() {
+      document.getElementById('portalAuthOverlay').style.display = 'none';
+      document.getElementById('portalApp').style.display = 'block';
+
+      const userText = currentSubscriber.name
+        ? `${currentSubscriber.name} · ${currentSubscriber.organization || 'Abonnent'}`
+        : `${currentSubscriber.email} · ${currentSubscriber.organization || 'Virksomhet'}`;
+      document.getElementById('userNameText').textContent = userText;
+
+      initSituationMap();
+      loadTodayReport();
+    }
+
+    function logoutSubscriber() {
+      sessionStorage.removeItem('mb_portal_user');
+      window.location.reload();
+    }
+
+    // -------------------------------------------------------------------------
+    // Kartlogikk (100 % forankret og ren Esri Canvas)
+    // -------------------------------------------------------------------------
+    function initSituationMap() {
+      if (situationMap) return;
+      const mapEl = document.getElementById('situationMap');
+      if (!mapEl || typeof L === 'undefined') return;
+
+      situationMap = L.map('situationMap', {
+        center: [26, 42],
+        zoom: 2.6,
+        minZoom: 2.2,
+        maxZoom: 10,
+        scrollWheelZoom: false,
+        maxBounds: [[-85, -180], [85, 180]],
+        maxBoundsViscosity: 1.0,
+        worldCopyJump: false
+      });
+
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      mapTileLayer = createTileLayer(isDark).addTo(situationMap);
+      mapMarkersLayer = L.layerGroup().addTo(situationMap);
+    }
+
+    function createTileLayer(isDark) {
+      const tileUrl = isDark
+        ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+        : 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+
+      return L.tileLayer(tileUrl, {
+        maxZoom: 16,
+        noWrap: true,
+        bounds: [[-85, -180], [85, 180]],
+        attribution: '&copy; <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a> &mdash; Canvas'
+      });
+    }
+
+    function updateMapTheme(isDark) {
+      if (situationMap) {
+        if (mapTileLayer) situationMap.removeLayer(mapTileLayer);
+        mapTileLayer = createTileLayer(isDark).addTo(situationMap);
+        if (mapMarkersLayer) mapMarkersLayer.bringToFront();
+        setTimeout(() => situationMap.invalidateSize(), 60);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // Dagsrapport & Brennpunkt-matching
+    // -------------------------------------------------------------------------
+    async function loadTodayReport() {
+      const container = document.getElementById('reportContent');
+      try {
+        let reportHtml = '';
+        // 1. Prøv Python API
+        const res = await fetch(`${API_BASE}/portal/today`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.has_report) reportHtml = data.html_content;
+        }
+
+        // 2. Fallback til Apps Script
+        if (!reportHtml) {
+          const fbRes = await fetch(`${FALLBACK_API_URL}?api=reports&days=1`);
+          const fbData = await fbRes.json();
+          if (fbData.reports && fbData.reports.length > 0) {
+            reportHtml = fbData.reports[0].html;
+          }
+        }
+
+        if (reportHtml) {
+          container.innerHTML = reportHtml;
+          renderMapHotspots(container);
+        } else {
+          container.innerHTML = `
+            <div style="text-align:center; padding: 40px 10px; color: var(--text-muted);">
+              <h3>Morgenbriefen produseres kl. 05:00</h3>
+              <p>Dagens utgave er straks tilgjengelig for alle abonnenter.</p>
+            </div>`;
+        }
+      } catch (e) {
+        container.innerHTML = '<p style="text-align:center; color:#DC2626; padding: 30px;">Kunne ikke hente dagens rapport. Sjekk internettforbindelsen.</p>';
+      }
+    }
+
+    function renderMapHotspots(container) {
+      if (!situationMap || !mapMarkersLayer) return;
+      mapMarkersLayer.clearLayers();
+
+      const text = container.innerText.toLowerCase();
+      const detected = [];
+      const activeBounds = [];
+
+      GEOPOLITICAL_NODES.forEach(node => {
+        const hit = node.keywords.some(kw => text.includes(kw));
+        if (hit) {
+          detected.push(node);
+          activeBounds.push(node.coords);
+
+          const pulseIcon = L.divIcon({
+            className: 'mb-custom-div-icon',
+            html: `<div class="pulse-marker-active" title="${node.title}"><div class="ring"></div><div class="core"></div></div>`,
+            iconSize: [24, 24],
+            iconAnchor: [12, 12],
+            popupAnchor: [0, -12]
+          });
+
+          const popupHtml = `
+            <div class="popup-hotspot-header">🔴 ${node.title}</div>
+            <div class="popup-story-title">Aktivt brennpunkt i dagens analyse</div>
+            <div class="popup-hotspot-text">Rapporten omtaler strategiske bevegelser i denne regionen.</div>
+          `;
+
+          const m = L.marker(node.coords, { icon: pulseIcon }).addTo(mapMarkersLayer);
+          m.bindPopup(popupHtml);
+          node.marker = m;
+        } else {
+          const monitorIcon = L.divIcon({
+            className: 'mb-custom-div-icon',
+            html: `<div class="pulse-marker-monitor" title="${node.title}"><div class="core"></div></div>`,
+            iconSize: [18, 18],
+            iconAnchor: [9, 9],
+            popupAnchor: [0, -9]
+          });
+
+          const popupHtml = `
+            <div class="popup-hotspot-header" style="color:var(--primary);">🌐 ${node.title}</div>
+            <div class="popup-hotspot-text">Observasjonspunkt · Ingen akutte hendelser registrert i dag.</div>
+          `;
+
+          const m = L.marker(node.coords, { icon: monitorIcon }).addTo(mapMarkersLayer);
+          m.bindPopup(popupHtml);
+        }
+      });
+
+      document.getElementById('hotspotCountSubtitle').textContent = `${detected.length} aktive brennpunkter identifisert`;
+
+      // Filter-brikker over kartet
+      const bar = document.getElementById('mapHotspotsBar');
+      bar.innerHTML = '';
+
+      const globalBtn = document.createElement('button');
+      globalBtn.type = 'button';
+      globalBtn.className = 'hotspot-chip active';
+      globalBtn.innerHTML = '<span>🌐</span> Hele verden';
+      globalBtn.onclick = () => {
+        document.querySelectorAll('.hotspot-chip').forEach(c => c.classList.remove('active'));
+        globalBtn.classList.add('active');
+        if (activeBounds.length > 0) {
+          situationMap.fitBounds(activeBounds, { padding: [40, 40], maxZoom: 5 });
+        } else {
+          situationMap.setView([26, 42], 2.6);
+        }
+        situationMap.closePopup();
+      };
+      bar.appendChild(globalBtn);
+
+      detected.forEach(node => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'hotspot-chip';
+        chip.innerHTML = `<span>🔴</span> ${node.title}`;
+        chip.onclick = () => {
+          document.querySelectorAll('.hotspot-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          situationMap.flyTo(node.coords, 5.5, { duration: 1.0 });
+          if (node.marker) node.marker.openPopup();
+        };
+        bar.appendChild(chip);
+      });
+
+      if (activeBounds.length > 0) {
+        situationMap.fitBounds(activeBounds, { padding: [40, 40], maxZoom: 5 });
+      }
+      setTimeout(() => situationMap.invalidateSize(), 200);
+    }
+
+    // -------------------------------------------------------------------------
+    // Verktøy, tema og faner
+    // -------------------------------------------------------------------------
+    function switchPortalTab(tab) {
+      document.getElementById('sectionToday').style.display = (tab === 'today') ? 'block' : 'none';
+      document.getElementById('sectionArchive').style.display = (tab === 'archive') ? 'block' : 'none';
+      document.getElementById('tabToday').classList.toggle('active', tab === 'today');
+      document.getElementById('tabArchive').classList.toggle('active', tab === 'archive');
+
+      if (tab === 'today' && situationMap) {
+        setTimeout(() => situationMap.invalidateSize(), 100);
+      }
+      if (tab === 'archive') {
+        loadPortalArchive();
+      }
+    }
+
+    async function loadPortalArchive() {
+      const container = document.getElementById('archiveListContainer');
+      container.innerHTML = '<p style="color:var(--text-muted); padding:20px 0;">Henter tidligere utgaver...</p>';
+      try {
+        const res = await fetch(`${API_BASE}/portal/archive?days=30`);
+        const data = await res.json();
+        if (data.briefs && data.briefs.length > 0) {
+          container.innerHTML = data.briefs.map(b => `
+            <div class="archive-item">
+              <div>
+                <div class="archive-date">${b.date}</div>
+                <div class="archive-title">${b.lead_title} (${b.lead_category})</div>
+              </div>
+              <span style="font-size:12px; color:var(--primary); font-weight:600;">Les &rarr;</span>
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = '<p style="color:var(--text-muted); padding:20px 0;">Ingen tidligere utgaver i arkivet ennå.</p>';
+        }
+      } catch (e) {
+        container.innerHTML = '<p style="color:var(--text-muted); padding:20px 0;">Kunne ikke hente arkiv akkurat nå.</p>';
+      }
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      updateMapTheme(next === 'dark');
+    }
+
+    let currentZoom = 16;
+    function zoomFont(delta) {
+      currentZoom = Math.max(14, Math.min(22, currentZoom + delta));
+      document.body.style.fontSize = currentZoom + 'px';
+    }
+  </script>
+</body>
+</html>
