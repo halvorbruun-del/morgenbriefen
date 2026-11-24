@@ -1759,24 +1759,16 @@
             </div>
           </div>
 
-          <!-- Manuell testkjøring & Driftskontroll -->
-          <div class="card">
-            <h2 style="margin-bottom: 6px;">⚡ Manuell testkjøring & Driftskontroll</h2>
-            <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 16px;">
-              Kjør systemets 3 kjerneprosesser manuelt for å teste e-postutsending, Gemini-evaluering eller systemhelse:
+          <!-- Driftsstatus 3.0 (erstatter gamle 1.0-testknapper) -->
+          <div class="card" style="border-left: 4px solid #0B5394;">
+            <h2 style="margin-bottom: 6px;">🚀 Morgenbriefen 3.0 er aktiv i produksjon</h2>
+            <p style="color: var(--text-muted); font-size: 13.5px; line-height: 1.55; margin-bottom: 10px;">
+              Daglig utsending kjøres nå automatisk fra lokal server alle 7 dager kl. <b>05:45</b> (sikkerhetskjøring kl. 06:05).
+              Gamle 1.0-testknapper er fjernet herfra for å hindre at utdaterte Apps Script-utløsere vekkes ved et uhell.
             </p>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-              <button type="button" id="btnTestBrief" class="btn-primary" style="background-color: #0B5394;" onclick="triggerTest('test_brief', this, '📧 Send test-morgenbrief til meg nå')">
-                📧 Send test-morgenbrief til meg nå
-              </button>
-              <button type="button" id="btnTestEval" class="btn-primary" style="background-color: #14284B;" onclick="triggerTest('test_eval', this, '🧠 Kjør evaluering & teknisk driftsrapport nå')">
-                🧠 Kjør evaluering & teknisk driftsrapport nå
-              </button>
-              <button type="button" id="btnTestSentinel" class="btn-primary" style="background-color: #475569;" onclick="triggerTest('test_sentinel', this, '🛡️ Kjør Sentinel systemsjekk (Audit) nå')">
-                🛡️ Kjør Sentinel systemsjekk (Audit) nå
-              </button>
-            </div>
-            <div id="testStatusMsg" class="status-msg"></div>
+            <p style="color: var(--text-main); font-size: 13px; margin: 0;">
+              ✅ <b>Abonnenter</b> og <b>Ukens strategiske fokus</b> på denne siden styrer fortsatt 3.0 direkte via Google-regnearket.
+            </p>
           </div>
 
           <!-- Drifts-telemetri & Kjøringsbudsjett -->
@@ -2585,30 +2577,6 @@
     function filterSources() {
       const q = document.getElementById('srcSearchInput').value.trim();
       renderSourcesList(q);
-    }
-
-    async function triggerTest(action, btn, originalText) {
-      if (action === 'test_brief') {
-        if (!confirm('Vil du starte en testkjøring av Morgenbriefen nå? Analysen av alle 62 kilder og Gemini-verifiseringen kjører asynkront i bakgrunnen og tar ca. 3–4 minutter.')) return;
-      }
-      const msgBox = document.getElementById('testStatusMsg');
-      btn.disabled = true;
-      btn.textContent = '⏳ Utfører kjøring… Vennligst vent…';
-      msgBox.style.display = 'none';
-
-      try {
-        const data = await sendSecureApi(action);
-        msgBox.textContent = data.message || 'Handlingen ble fullført!';
-        msgBox.className = 'status-msg ' + (data.status === 'ok' ? 'ok' : 'err');
-        msgBox.style.display = 'block';
-      } catch (e) {
-        msgBox.textContent = 'Feil: ' + e.message;
-        msgBox.className = 'status-msg err';
-        msgBox.style.display = 'block';
-      } finally {
-        btn.disabled = false;
-        btn.textContent = originalText;
-      }
     }
 
     async function handleChangePin(e) {
