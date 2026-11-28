@@ -3,26 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Morgenbriefen (0600.no) – Lukket fagpilot</title>
-  <meta name="description" content="Morgenbriefen (0600.no) – Redaktørstyrt overblikk over utenriks, sikkerhet og geoøkonomi i innboksen kl. 06:00. For tiden i lukket fagpilot.">
+  <title>Morgenbriefen (0600.no) – Lukket prøveutgave</title>
+  <meta name="description" content="Morgenbriefen (0600.no) – Daglig, redaktørstyrt analyse av internasjonal politikk, sikkerhet og geoøkonomi – ferdig lest på fire minutter før arbeidsdagen starter.">
   <meta name="robots" content="noindex, nofollow, noarchive">
   <meta name="theme-color" content="#14284B">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2218%22 fill=%22%2314284B%22/><text x=%2250%22 y=%2263%22 font-family=%22Georgia,serif%22 font-weight=%22bold%22 font-size=%2238%22 fill=%22%23FFFFFF%22 text-anchor=%22middle%22>0600</text></svg>">
+
+  <!-- Delingskort for Slack, Teams, SMS og LinkedIn -->
+  <meta property="og:title" content="Morgenbriefen (0600.no) – Verden i klartekst">
+  <meta property="og:description" content="Daglig, redaktørstyrt analyse av internasjonal politikk, sikkerhet og geoøkonomi – ferdig lest på fire minutter før arbeidsdagen starter.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://0600.no/">
+  <meta property="og:image" content="https://0600.no/assets/morgenbriefen-header.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Morgenbriefen (0600.no) – Verden i klartekst">
+  <meta name="twitter:description" content="Daglig, redaktørstyrt analyse av internasjonal politikk, sikkerhet og geoøkonomi – ferdig lest på fire minutter før arbeidsdagen starter.">
+  <meta name="twitter:image" content="https://0600.no/assets/morgenbriefen-header.png">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2218%22 fill=%22%2314284B%22/><rect x=%2214%22 y=%2276%22 width=%2272%22 height=%226%22 rx=%223%22 fill=%22%235B94B5%22/><text x=%2250%22 y=%2261%22 font-family=%22Arial,Helvetica,sans-serif%22 font-weight=%22800%22 font-size=%2234%22 letter-spacing=%22-1%22 fill=%22%23FFFFFF%22 text-anchor=%22middle%22>0600</text></svg>">
   <style>
     :root {
       --navy-900: #0C1930;
       --navy-800: #14284B;
-      --blue-link: #0B5394;
-      --blue-hover: #083D6E;
+      --steel-400: #5B94B5;
+      --steel-600: #3B6E8C;
+      --steel-700: #2C556E;
       --bg-page: #F6F8FB;
       --bg-card: #FFFFFF;
-      --bg-subtle: #F1F5F9;
+      --bg-subtle: #F8FAFC;
       --text-main: #182232;
       --text-body: #2D3748;
       --text-muted: #5A6B82;
       --border-light: #DCE3EE;
-      --border-strong: #C3CFE0;
-      --serif: Georgia, Cambria, "Times New Roman", Times, serif;
       --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
@@ -53,10 +64,21 @@
       max-width: 560px;
       background: var(--bg-card);
       border: 1px solid var(--border-light);
-      border-top: 4px solid var(--navy-800);
       border-radius: 8px;
-      box-shadow: 0 12px 32px rgba(12, 25, 48, 0.06);
-      padding: 40px 38px 34px;
+      overflow: hidden;
+      box-shadow: 0 12px 32px rgba(12, 25, 48, 0.08);
+    }
+
+    .card-banner {
+      background-color: var(--navy-800);
+      display: block;
+    }
+
+    .card-banner img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 0;
     }
 
     .top-meta {
@@ -65,25 +87,24 @@
       justify-content: space-between;
       gap: 12px;
       flex-wrap: wrap;
-      margin-bottom: 22px;
+      background: var(--bg-subtle);
+      border-top: 2px solid var(--steel-400);
+      border-bottom: 1px solid var(--border-light);
+      padding: 10px 38px;
     }
 
-    .domain-badge {
-      font-size: 12px;
+    .domain-label {
+      font-size: 13px;
       font-weight: 700;
-      letter-spacing: 0.4px;
-      color: var(--navy-800);
-      background: var(--bg-subtle);
-      border: 1px solid var(--border-strong);
-      padding: 3px 10px;
-      border-radius: 4px;
+      letter-spacing: 0.3px;
+      color: var(--steel-600);
     }
 
     .pilot-pill {
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 600;
       color: var(--navy-800);
       letter-spacing: 0.2px;
@@ -93,33 +114,28 @@
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background-color: var(--navy-800);
+      background-color: var(--steel-600);
       display: inline-block;
     }
 
-    h1 {
-      font-family: var(--serif);
-      font-size: 36px;
-      font-weight: 700;
-      line-height: 1.15;
-      color: var(--navy-900);
-      letter-spacing: -0.5px;
-      margin-bottom: 14px;
+    .card-body {
+      padding: 30px 38px 34px;
     }
 
     .lead {
       font-size: 17px;
       line-height: 1.6;
       color: var(--text-body);
-      margin-bottom: 26px;
+      margin-bottom: 24px;
     }
 
     .notice-box {
       background: var(--bg-subtle);
-      border-left: 3px solid var(--navy-800);
+      border: 1px solid var(--border-light);
+      border-left: 3px solid var(--steel-600);
       border-radius: 0 6px 6px 0;
       padding: 16px 18px;
-      margin-bottom: 26px;
+      margin-bottom: 24px;
     }
 
     .notice-box p {
@@ -142,23 +158,23 @@
     }
 
     .contact-label {
-      font-size: 12.5px;
-      font-weight: 600;
+      font-size: 12px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
       color: var(--text-muted);
     }
 
     .contact-link {
       font-size: 16px;
       font-weight: 600;
-      color: var(--blue-link);
+      color: var(--steel-600);
       text-decoration: none;
       width: fit-content;
     }
 
     .contact-link:hover {
-      color: var(--blue-hover);
+      color: var(--steel-700);
       text-decoration: underline;
     }
 
@@ -178,11 +194,11 @@
     }
 
     @media (max-width: 520px) {
-      .card {
-        padding: 30px 22px 26px;
+      .top-meta {
+        padding: 10px 22px;
       }
-      h1 {
-        font-size: 30px;
+      .card-body {
+        padding: 24px 22px 26px;
       }
       .lead {
         font-size: 16px;
@@ -192,32 +208,37 @@
 </head>
 <body>
   <main class="card" role="main">
+    <div class="card-banner">
+      <img src="assets/morgenbriefen-header.png" alt="Morgenbriefen – 0600 | Verden i klartekst">
+    </div>
+
     <div class="top-meta">
-      <span class="domain-badge">0600.no</span>
-      <span class="pilot-pill"><span class="pilot-dot" aria-hidden="true"></span>Lukket fagpilot</span>
+      <span class="domain-label">0600.no</span>
+      <span class="pilot-pill"><span class="pilot-dot" aria-hidden="true"></span>Lukket prøveutgave</span>
     </div>
 
-    <h1>Morgenbriefen</h1>
-    <p class="lead">
-      Redaktørstyrt overblikk over utenriks, sikkerhet og geoøkonomi – i innboksen kl. 06:00.
-    </p>
-
-    <div class="notice-box">
-      <p>
-        <strong>Tjenesten er for tiden i lukket fagpilot.</strong>
-        Tilgang gis foreløpig kun etter personlig invitasjon fra redaksjonen.
+    <div class="card-body">
+      <p class="lead">
+        Daglig, redaktørstyrt analyse av internasjonal politikk, sikkerhet og geoøkonomi – ferdig lest på fire minutter før arbeidsdagen starter.
       </p>
-    </div>
 
-    <div class="contact-row">
-      <span class="contact-label">Redaksjon og henvendelser</span>
-      <a class="contact-link" href="mailto:halvor@0600.no?subject=Morgenbriefen%20(0600.no)">halvor@0600.no</a>
-    </div>
+      <div class="notice-box">
+        <p>
+          <strong>Morgenbriefen sendes foreløpig ut til en begrenset leserkrets.</strong>
+          Nye mottakere tas inn etter invitasjon eller ved direkte henvendelse til redaksjonen.
+        </p>
+      </div>
 
-    <footer class="card-footer">
-      <span class="editor-line">Ansvarlig redaktør: Halvor Bruun · Oslo</span>
-      <span>Åpen analyse over internasjonale og nordiske fagkilder · Norsk tid (Europe/Oslo)</span>
-    </footer>
+      <div class="contact-row">
+        <span class="contact-label">Redaksjon og henvendelser</span>
+        <a class="contact-link" href="mailto:halvor@0600.no?subject=Morgenbriefen%20(0600.no)">halvor@0600.no</a>
+      </div>
+
+      <footer class="card-footer">
+        <span class="editor-line">Ansvarlig redaktør: Halvor Bruun · Oslo</span>
+        <span>Basert på 87 internasjonale og nordiske primær- og fagkilder · Hverdager kl. 06:00</span>
+      </footer>
+    </div>
   </main>
 </body>
 </html>
